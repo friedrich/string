@@ -160,7 +160,7 @@ class StringAnimation
 			else
 				new THREE.CanvasRenderer(renderer_parameters)
 
-		@renderer.setSize(@canvas.width, @canvas.height)
+		@renderer.setSize(@canvas.scrollWidth, @canvas.scrollHeight)
 
 		@scene = new THREE.Scene()
 
