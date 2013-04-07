@@ -10,8 +10,8 @@ window.addEventListener "load", ->
 	for string_name of string_containers
 		new StringAnimation(string_containers[string_name])
 
-Array.prototype.reduce2 = (a, b) ->
-	this.reduce(b, a)
+reduce = (array, a, b) ->
+	array.reduce(b, a)
 
 setTimeout2 = (a, b) ->
 	setTimeout(b, a)
@@ -27,8 +27,8 @@ class OpenString
 
 	calculate_velocity: ->
 		# set the length of the string so that @x_m_velocity = 1 and the global frame is its rest frame
-		length_squared = Math.PI * Math.PI * 2 * @regge_slope * @modes.reduce2 0, (sum, modesi) ->
-			sum + modesi.reduce2 0, (sum1, mode) ->
+		length_squared = Math.PI * Math.PI * 2 * @regge_slope * reduce @modes, 0, (sum, modesi) ->
+			sum + reduce modesi, 0, (sum1, mode) ->
 				sum1 + mode.a * mode.a + mode.b * mode.b
 		@length = Math.sqrt(length_squared)
 
@@ -36,8 +36,8 @@ class OpenString
 		@y_m_factor = - Math.PI / @length * 2 * @regge_slope
 
 	calculate_simulation_properties: ->
-		@top_mode = @modes.reduce2 0, (top0, modesi) ->
-			top = modesi.reduce2 0, (top1, mode) ->
+		@top_mode = reduce @modes, 0, (top0, modesi) ->
+			top = reduce modesi, 0, (top1, mode) ->
 				Math.max(top1, mode.n)
 			Math.max(top0, top)
 		@tau_increment = @length / @top_mode / @tau_steps_per_fastest_revolution
@@ -46,7 +46,7 @@ class OpenString
 		vtau = Math.PI * tau / @length
 		vsigma = Math.PI * sigma / @length
 
-		return @x_i_factor * @modes[i-2].reduce2 0, (sum, mode) ->
+		return @x_i_factor * reduce @modes[i-2], 0, (sum, mode) ->
 			sum + (
 				mode.a * Math.sin(mode.n * vtau) -
 				mode.b * Math.cos(mode.n * vtau)
@@ -56,9 +56,9 @@ class OpenString
 		vtau = Math.PI * tau / @length
 		vsigma = Math.PI * sigma / @length
 
-		return @y_m_factor * @modes.reduce2 0, (sum, modesi) ->
-			sum + modesi.reduce2 0, (sum1, mode1) ->
-				sum1 + modesi.reduce2 0, (sum2, mode2) ->
+		return @y_m_factor * reduce @modes, 0, (sum, modesi) ->
+			sum + reduce modesi, 0, (sum1, mode1) ->
+				sum1 + reduce modesi, 0, (sum2, mode2) ->
 					sum2 += (
 						(mode1.b * mode2.a + mode1.a * mode2.b) * Math.cos((mode1.n + mode2.n) * vtau) +
 						(mode1.b * mode2.b - mode1.a * mode2.a) * Math.sin((mode1.n + mode2.n) * vtau)
@@ -139,7 +139,7 @@ class StringAnimation
 		@main_loop()
 
 	find_in_containers: (selector) ->
-		@containers.reduce2 [], (list, container) ->
+		reduce @containers, [], (list, container) ->
 			for element in container.querySelectorAll(selector)
 				list.push(element)
 			list
