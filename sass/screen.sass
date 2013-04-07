@@ -1,5 +1,4 @@
 @import susy
-@import eb-garamond-font
 
 $total-columns: 12
 $column-width: 4em
@@ -10,39 +9,13 @@ $grid-padding: $gutter-width
   +container
   // +susy-grid-background
 
-#links
-  +span-columns(2, 12)
-
 .string
-  +span-columns(2 omega, 12)
+  +span-columns(12, 12)
   canvas
     display: block
     margin: 0 auto
-
-body
-  font-family: "EB Garamond", serif
-
-h1
-  font-weight: normal
-  text-align: center
-  font-size: 10em
-  padding: 0
-  margin: 0.5em 0 0 0
-
-p, ul
-  font-size: 2em
-
-#links
-  list-style-type: none
-  padding-left: 0
-
-  a, .nolink
-    display: block
-    color: #444
-    text-decoration: none
-    padding-left: 0.3em
-    padding-right: 0.3em
-
-  a:hover, .nolink:hover
-    color: white
-    background-color: #444
+    border-style: dashed
+    border-width: 0.3em
+    border-color: black
+    width: 1000px
+    height: 500px
