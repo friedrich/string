@@ -1,10 +1,10 @@
-require 'susy'
+require "susy"
 
 http_path = "/"
-css_dir = "stylesheets"
-sass_dir = "sass"
-images_dir = "images"
-javascripts_dir = "javascripts"
+css_dir = "build/styles"
+sass_dir = "source/styles"
+images_dir = "assets"
+javascripts_dir = "build/js"
 
 output_style = (environment == :production) ? :compressed : :expanded
 
