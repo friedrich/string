@@ -9,6 +9,7 @@ window.addEventListener "load", ->
 
 	for string_name of string_containers
 		new StringAnimation(string_containers[string_name])
+	console.log("No 3d support")
 
 reduce = (array, a, b) ->
 	array.reduce(b, a)
@@ -154,11 +155,13 @@ class StringAnimation
 			canvas: @canvas
 			stencil: false
 
-		@renderer =
-			if Detector.webgl and false
-				new THREE.WebGLRenderer(renderer_parameters)
-			else
-				new THREE.CanvasRenderer(renderer_parameters)
+		if Modernizr.webgl
+			@renderer = new THREE.WebGLRenderer(renderer_parameters)
+		else if Modernizr.canvas
+			@renderer = new THREE.CanvasRenderer(renderer_parameters)
+		else
+			console.log("No 3d support")
+			return
 
 		@renderer.setSize(@canvas.scrollWidth, @canvas.scrollHeight)
 
