@@ -3,7 +3,7 @@
   var OpenString, StringAnimation, reduce, setTimeout2;
 
   window.addEventListener("load", function() {
-    var string_container, string_containers, string_name, _i, _len, _ref;
+    var string_container, string_containers, string_name, _i, _len, _ref, _results;
 
     string_containers = {};
     _ref = document.querySelectorAll("[data-string]");
@@ -13,10 +13,11 @@
       string_containers[string_name] || (string_containers[string_name] = []);
       string_containers[string_name].push(string_container);
     }
+    _results = [];
     for (string_name in string_containers) {
-      new StringAnimation(string_containers[string_name]);
+      _results.push(new StringAnimation(string_containers[string_name]));
     }
-    return console.log("No 3d support");
+    return _results;
   });
 
   reduce = function(array, a, b) {

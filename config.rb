@@ -6,6 +6,6 @@ sass_dir = "src/styles"
 images_dir = "assets"
 javascripts_dir = "build/js"
 
-output_style = (environment == :production) ? :compressed : :expanded
-
+output_style = :expanded
 preferred_syntax = :sass
+line_comments = false
