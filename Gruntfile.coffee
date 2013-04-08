@@ -30,31 +30,31 @@ module.exports = (grunt) ->
 
 		coffee:
 			all:
-				files: grunt.file.expandMapping(["source/**/*.coffee"], "", {
+				files: grunt.file.expandMapping(["src/**/*.coffee"], "", {
 					rename: (base, path) ->
-						path.replace(/^source\//, "build/").replace(/\.coffee$/, ".js")
+						path.replace(/^src\//, "build/").replace(/\.coffee$/, ".js")
 				})
 
 		haml:
 			all:
-				files: grunt.file.expandMapping(["source/**/*.haml"], "", {
+				files: grunt.file.expandMapping(["src/**/*.haml"], "", {
 					rename: (base, path) ->
-						path.replace(/^source\//, "build/").replace(/\.haml$/, ".html")
+						path.replace(/^src\//, "build/").replace(/\.haml$/, ".html")
 				})
 
 		concat:
 			js:
 				files:
 					"build/js/index.js": [
-						"source/js/vendor/jquery.js",
-						"source/js/vendor/three.js",
-						"source/js/vendor/modernizr.three.js",
+						"src/js/vendor/jquery.js",
+						"src/js/vendor/three.js",
+						"src/js/vendor/modernizr.three.js",
 						"build/js/string.js"
 					]
 
 		symlink:
 			assets:
-				target: "../assets"
+				target: "../src/assets"
 				link: "build/assets"
 				options:
 					force: true
@@ -72,15 +72,15 @@ module.exports = (grunt) ->
 
 		regarde:
 			coffee:
-				files: ["source/js/**/*.coffee"]
+				files: ["src/js/**/*.coffee"]
 				tasks: ["coffee", "concat:js"]
 				spawn: true
 			sass:
-				files: ["source/styles/**/*.sass"]
+				files: ["src/styles/**/*.sass"]
 				tasks: ["compass"]
 				spawn: true
 			haml:
-				files: ["source/**/*.haml"]
+				files: ["src/**/*.haml"]
 				tasks: ["haml"]
 				spawn: true
 			livereload:
