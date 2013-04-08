@@ -224,9 +224,12 @@ class StringAnimation
 
 	init_drawing: () ->
 		@canvas = @find_in_containers("canvas.string-display")[0]
+		@viewport_width = @canvas.scrollWidth
+		@viewport_height = @canvas.scrollHeight
 
 		renderer_parameters =
 			canvas: @canvas
+			alpha: false
 			stencil: false
 
 		# TODO: use SVGRenderer?
@@ -241,9 +244,12 @@ class StringAnimation
 			console.log("No 3d support")
 			return
 
-		@renderer.setSize(@canvas.scrollWidth, @canvas.scrollHeight)
+		@renderer.autoClear = false
+		@renderer.setClearColorHex(0xffffff, 1)
+		@renderer.setSize(@viewport_width, @viewport_height)
 
 		@scene = new THREE.Scene()
+		@overlay_scene = new THREE.Scene()
 
 		material_parameters =
 			color: 0
@@ -251,15 +257,41 @@ class StringAnimation
 
 		@string_geometry = new THREE.Geometry()
 		@string_material = new THREE.LineBasicMaterial(material_parameters)
-		@string_line = new THREE.Line(@string_geometry, @string_material)
-		@scene.add(@string_line)
+		@string_object = new THREE.Line(@string_geometry, @string_material)
+		@string_object.useQuaternion = true
+
+		@scene.add(@string_object)
 
 		@update_scene()
 
-		@camera = new THREE.PerspectiveCamera(75, @canvas.width / @canvas.height, 0.1, 1000)
-		@camera.position = new THREE.Vector3(2, 0, 0)
-		@camera.up = new THREE.Vector3(0, 0, 1)
-		@camera.lookAt(new THREE.Vector3(0, @camera.position.y, @camera.position.z))
+		@axis_object = new THREE.Object3D()
+		@axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 1, 0xff0000))
+		@axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), 1, 0x00ff00))
+		@axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(), 1, 0x0000ff))
+		@axis_object.scale = new THREE.Vector3(0.15, 0.15, 0.15)
+		@axis_object.position = new THREE.Vector3(0.2 - 1, 0.2 - @viewport_height / @viewport_width, 0)
+		@axis_object.useQuaternion = true
+
+		@overlay_scene.add(@axis_object)
+
+		@camera = new THREE.PerspectiveCamera(75, @viewport_width / @viewport_height, 0.1, 1000)
+		@camera.position = new THREE.Vector3(0, 0, 2)
+		@camera.up = new THREE.Vector3(0, 1, 0)
+		@camera.lookAt(new THREE.Vector3())
+
+		@overlay_camera = new THREE.OrthographicCamera(-1, 1, @viewport_height / @viewport_width, -@viewport_height / @viewport_width)
+		@overlay_camera.position = new THREE.Vector3(0, 0, 10)
+		@overlay_camera.up = new THREE.Vector3(0, 1, 0)
+		@overlay_camera.lookAt(new THREE.Vector3())
+
+		@rotation = new THREE.Quaternion()
+		@rotation.setFromEuler(new THREE.Vector3(-Math.PI / 2, 0, -Math.PI / 2))
+
+		@update_camera()
+
+	update_camera: () ->
+		@axis_object.quaternion = @rotation
+		@string_object.quaternion = @rotation
 
 	main_loop: () ->
 		window.requestAnimationFrame =>
@@ -267,7 +299,10 @@ class StringAnimation
 
 		@animate_frame(@clock.getDelta())
 		@update_scene()
+
+		@renderer.clear(true, true, false)
 		@renderer.render(@scene, @camera)
+		@renderer.render(@overlay_scene, @overlay_camera)
 
 	update_scene: () ->
 		@string_geometry.vertices = @string_vertices
