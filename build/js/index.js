@@ -737,10 +737,9 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
 
     OpenString.prototype.tau_steps_per_fastest_revolution = 24;
 
-    OpenString.prototype.stored_coordinates = {};
-
     function OpenString(modes) {
       this.modes = modes;
+      this.stored_coordinates = {};
       this.calculate_velocity();
       this.calculate_simulation_properties();
     }

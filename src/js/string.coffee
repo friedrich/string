@@ -24,9 +24,9 @@ setTimeout2 = (a, b) ->
 class OpenString
 	regge_slope: 1 / 2
 	tau_steps_per_fastest_revolution: 24
-	stored_coordinates: {}
 
 	constructor: (@modes) ->
+		@stored_coordinates = {}
 		@calculate_velocity()
 		@calculate_simulation_properties()
 
