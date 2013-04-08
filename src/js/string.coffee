@@ -128,16 +128,7 @@ class StringAnimation
 	string_segments: 48
 
 	constructor: (@containers) ->
-		modes = [
-			[	# i = 2
-				{ n: 1, a: 0.5, b: 0 },
-				{ n: 2, a: 0.5, b: 0 },
-			],
-			[	# i = 3
-			],
-		]
-		@string = new OpenString(modes)
-
+		@init_controls()
 		@init_animation()
 		@init_drawing()
 		@main_loop()
@@ -150,9 +141,19 @@ class StringAnimation
 
 	init_animation: () ->
 		@clock = new THREE.Clock()
+		@update_modes()
+
+	update_modes: () ->
+		modes = JSON.parse(@mode_control_textarea.value)
+		@string = new OpenString(modes)
+
+	init_controls: () ->
+		@mode_control_textarea = @find_in_containers("textarea.string-modes")[0]
+		@mode_control_textarea.addEventListener "blur", =>
+			@update_modes()
 
 	init_drawing: () ->
-		@canvas = @find_in_containers("canvas")[0]
+		@canvas = @find_in_containers("canvas.string-display")[0]
 
 		renderer_parameters =
 			canvas: @canvas

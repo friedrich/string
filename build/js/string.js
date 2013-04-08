@@ -42,16 +42,16 @@
     }
 
     OpenString.prototype.calculate_velocity = function() {
-      var length_squared;
+      var inverse_c_squared;
 
-      length_squared = Math.PI * Math.PI * 2 * this.regge_slope * reduce(this.modes, 0, function(sum, modesi) {
+      inverse_c_squared = 2 * this.regge_slope * Math.PI * Math.PI * reduce(this.modes, 0, function(sum, modesi) {
         return sum + reduce(modesi, 0, function(sum1, mode) {
           return sum1 + mode.a * mode.a + mode.b * mode.b;
         });
       });
-      this.length = Math.sqrt(length_squared);
+      this.c = 1 / Math.sqrt(inverse_c_squared);
       this.x_i_factor = 2 * Math.sqrt(2 * this.regge_slope);
-      return this.y_m_factor = -Math.PI / this.length * 2 * this.regge_slope;
+      return this.y_m_factor = -Math.PI * this.c * 2 * this.regge_slope;
     };
 
     OpenString.prototype.calculate_simulation_properties = function() {
@@ -63,14 +63,14 @@
         });
         return Math.max(top0, top);
       });
-      return this.tau_increment = this.length / this.top_mode / this.tau_steps_per_fastest_revolution;
+      return this.tau_increment = 1 / (this.c * this.top_mode * this.tau_steps_per_fastest_revolution);
     };
 
     OpenString.prototype.x_i = function(i, tau, sigma) {
       var vsigma, vtau;
 
-      vtau = Math.PI * tau / this.length;
-      vsigma = Math.PI * sigma / this.length;
+      vtau = Math.PI * tau * this.c;
+      vsigma = Math.PI * sigma;
       return this.x_i_factor * reduce(this.modes[i - 2], 0, function(sum, mode) {
         return sum + (mode.a * Math.sin(mode.n * vtau) - mode.b * Math.cos(mode.n * vtau)) * Math.cos(mode.n * vsigma) / mode.n;
       });
@@ -79,8 +79,8 @@
     OpenString.prototype.y_m = function(tau, sigma) {
       var vsigma, vtau;
 
-      vtau = Math.PI * tau / this.length;
-      vsigma = Math.PI * sigma / this.length;
+      vtau = Math.PI * tau * this.c;
+      vsigma = Math.PI * sigma;
       return this.y_m_factor * reduce(this.modes, 0, function(sum, modesi) {
         return sum + reduce(modesi, 0, function(sum1, mode1) {
           return sum1 + reduce(modesi, 0, function(sum2, mode2) {
@@ -148,23 +148,8 @@
     StringAnimation.prototype.string_segments = 48;
 
     function StringAnimation(containers) {
-      var modes;
-
       this.containers = containers;
-      modes = [
-        [
-          {
-            n: 1,
-            a: 0.5,
-            b: 0
-          }, {
-            n: 2,
-            a: 0.5,
-            b: 0
-          }
-        ], []
-      ];
-      this.string = new OpenString(modes);
+      this.init_controls();
       this.init_animation();
       this.init_drawing();
       this.main_loop();
@@ -184,13 +169,30 @@
     };
 
     StringAnimation.prototype.init_animation = function() {
-      return this.clock = new THREE.Clock();
+      this.clock = new THREE.Clock();
+      return this.update_modes();
+    };
+
+    StringAnimation.prototype.update_modes = function() {
+      var modes;
+
+      modes = JSON.parse(this.mode_control_textarea.value);
+      return this.string = new OpenString(modes);
+    };
+
+    StringAnimation.prototype.init_controls = function() {
+      var _this = this;
+
+      this.mode_control_textarea = this.find_in_containers("textarea.string-modes")[0];
+      return this.mode_control_textarea.addEventListener("blur", function() {
+        return _this.update_modes();
+      });
     };
 
     StringAnimation.prototype.init_drawing = function() {
       var material_parameters, renderer_parameters;
 
-      this.canvas = this.find_in_containers("canvas")[0];
+      this.canvas = this.find_in_containers("canvas.string-display")[0];
       renderer_parameters = {
         canvas: this.canvas,
         stencil: false
@@ -244,7 +246,7 @@
 
         _results = [];
         for (i = _i = 0, _ref = this.string_segments; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
-          _results.push(this.string_coordinates(this.clock.elapsedTime, i / this.string_segments * this.string.length));
+          _results.push(this.string_coordinates(this.clock.elapsedTime, i / this.string_segments));
         }
         return _results;
       }).call(this);
