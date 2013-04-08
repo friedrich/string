@@ -1,5 +1,7 @@
 @import susy
 
++border-box-sizing
+
 $total-columns: 12
 $column-width: 4em
 $gutter-width: 1em
@@ -11,11 +13,11 @@ $grid-padding: $gutter-width
 
 .string
   +span-columns(12, 12)
+  border-style: dashed
+  border-width: 0.3em
+  border-color: black
+
   canvas
     display: block
-    margin: 0 auto
-    border-style: dashed
-    border-width: 0.3em
-    border-color: black
-    width: 1000px
+    width: 100%
     height: 500px

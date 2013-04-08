@@ -9,7 +9,6 @@ window.addEventListener "load", ->
 
 	for string_name of string_containers
 		new StringAnimation(string_containers[string_name])
-	console.log("No 3d support")
 
 reduce = (array, a, b) ->
 	array.reduce(b, a)

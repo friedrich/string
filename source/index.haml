@@ -5,28 +5,28 @@
     %link(href="/styles/screen.css" rel="stylesheet" type="text/css")
     %title String
   %body
-    .string(data-string="main")
-      %canvas
+    .container
+      .string(data-string="main")
+        %canvas
 
-    .string_controls(data-string="main")
-      %table
-        %tr
-          %th
-          %th n=1
-          %th n=2
-          %th n=3
-        %tr
-          %th i=2
-          %td
-            %span(data-string-mode="{ n: 1, i: i }")
-            %button(data-string-inc-mode="{ n: 1, i: i }") +
-            %button(data-string-dev-mode="{ n: 1, i: i }") -
-          %td
-          %td
-        %tr
-          %th i=3
-          %td
-          %td
-          %td
-
-    %script(src="/js/index.js")
+      .string_controls(data-string="main")
+        %table
+          %tr
+            %th
+            %th n=1
+            %th n=2
+            %th n=3
+          %tr
+            %th i=2
+            %td
+              %span(data-string-mode="{ n: 1, i: i }")
+              %button(data-string-inc-mode="{ n: 1, i: i }") +
+              %button(data-string-dev-mode="{ n: 1, i: i }") -
+            %td
+            %td
+          %tr
+            %th i=3
+            %td
+            %td
+            %td
+      %script(src="/js/index.js")
