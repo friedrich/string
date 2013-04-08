@@ -33,7 +33,7 @@
   String = (function() {
     String.prototype.regge_slope = 1 / 2;
 
-    String.prototype.tau_steps_per_fastest_revolution = 24;
+    String.prototype.tau_steps_per_fastest_revolution = 32;
 
     function String(modes) {
       this.modes = modes;
@@ -263,14 +263,18 @@
       var _this = this;
 
       this.mode_control_textarea = this.find_in_containers("textarea.string-modes")[0];
-      this.mode_control_textarea.addEventListener("blur", function() {
-        return _this.update_string();
-      });
+      if (this.mode_control_textarea) {
+        this.mode_control_textarea.addEventListener("blur", function() {
+          return _this.update_string();
+        });
+      }
       this.type_control_button = this.find_in_containers("button.string-type")[0];
-      return this.type_control_button.addEventListener("click", function() {
-        _this.open_string = !_this.open_string;
-        return _this.update_string();
-      });
+      if (this.type_control_button) {
+        return this.type_control_button.addEventListener("click", function() {
+          _this.open_string = !_this.open_string;
+          return _this.update_string();
+        });
+      }
     };
 
     StringAnimation.prototype.init_drawing = function() {

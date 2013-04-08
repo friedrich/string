@@ -23,7 +23,7 @@ setTimeout2 = (a, b) ->
 # * Value of c follows.
 class String
 	regge_slope: 1 / 2
-	tau_steps_per_fastest_revolution: 24
+	tau_steps_per_fastest_revolution: 32
 
 	constructor: (@modes) ->
 		@stored_coordinates = {}
@@ -48,6 +48,7 @@ class String
 		]
 
 	coordinates_at_global_time: (t, sigma) ->
+		# TODO: increse step size if time is distant
 		if @stored_coordinates[sigma]
 			tau_low = @stored_coordinates[sigma].tau_low
 			coords_low = @stored_coordinates[sigma].coords_low
@@ -211,13 +212,15 @@ class StringAnimation
 
 	init_controls: () ->
 		@mode_control_textarea = @find_in_containers("textarea.string-modes")[0]
-		@mode_control_textarea.addEventListener "blur", =>
-			@update_string()
+		if @mode_control_textarea
+			@mode_control_textarea.addEventListener "blur", =>
+				@update_string()
 
 		@type_control_button = @find_in_containers("button.string-type")[0]
-		@type_control_button.addEventListener "click", =>
-			@open_string = !@open_string
-			@update_string()
+		if @type_control_button
+			@type_control_button.addEventListener "click", =>
+				@open_string = !@open_string
+				@update_string()
 
 	init_drawing: () ->
 		@canvas = @find_in_containers("canvas.string-display")[0]
