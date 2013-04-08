@@ -698,13 +698,11 @@ fragmentShader:"uniform lowp int renderType;\nuniform sampler2D map;\nuniform fl
 fragmentShader:"precision mediump float;\nuniform lowp int renderType;\nuniform sampler2D map;\nuniform sampler2D occlusionMap;\nuniform float opacity;\nuniform vec3 color;\nvarying vec2 vUV;\nvoid main() {\nif( renderType == 0 ) {\ngl_FragColor = vec4( texture2D( map, vUV ).rgb, 0.0 );\n} else if( renderType == 1 ) {\ngl_FragColor = texture2D( map, vUV );\n} else {\nfloat visibility = texture2D( occlusionMap, vec2( 0.5, 0.1 ) ).a +\ntexture2D( occlusionMap, vec2( 0.9, 0.5 ) ).a +\ntexture2D( occlusionMap, vec2( 0.5, 0.9 ) ).a +\ntexture2D( occlusionMap, vec2( 0.1, 0.5 ) ).a;\nvisibility = ( 1.0 - visibility / 4.0 );\nvec4 texture = texture2D( map, vUV );\ntexture.a *= opacity * visibility;\ngl_FragColor = texture;\ngl_FragColor.rgb *= color;\n}\n}"}};THREE.ShaderSprite={sprite:{vertexShader:"uniform int useScreenCoordinates;\nuniform int sizeAttenuation;\nuniform vec3 screenPosition;\nuniform mat4 modelViewMatrix;\nuniform mat4 projectionMatrix;\nuniform float rotation;\nuniform vec2 scale;\nuniform vec2 alignment;\nuniform vec2 uvOffset;\nuniform vec2 uvScale;\nattribute vec2 position;\nattribute vec2 uv;\nvarying vec2 vUV;\nvoid main() {\nvUV = uvOffset + uv * uvScale;\nvec2 alignedPosition = position + alignment;\nvec2 rotatedPosition;\nrotatedPosition.x = ( cos( rotation ) * alignedPosition.x - sin( rotation ) * alignedPosition.y ) * scale.x;\nrotatedPosition.y = ( sin( rotation ) * alignedPosition.x + cos( rotation ) * alignedPosition.y ) * scale.y;\nvec4 finalPosition;\nif( useScreenCoordinates != 0 ) {\nfinalPosition = vec4( screenPosition.xy + rotatedPosition, screenPosition.z, 1.0 );\n} else {\nfinalPosition = projectionMatrix * modelViewMatrix * vec4( 0.0, 0.0, 0.0, 1.0 );\nfinalPosition.xy += rotatedPosition * ( sizeAttenuation == 1 ? 1.0 : finalPosition.z );\n}\ngl_Position = finalPosition;\n}",
 fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opacity;\nuniform int fogType;\nuniform vec3 fogColor;\nuniform float fogDensity;\nuniform float fogNear;\nuniform float fogFar;\nuniform float alphaTest;\nvarying vec2 vUV;\nvoid main() {\nvec4 texture = texture2D( map, vUV );\nif ( texture.a < alphaTest ) discard;\ngl_FragColor = vec4( color * texture.xyz, texture.a * opacity );\nif ( fogType > 0 ) {\nfloat depth = gl_FragCoord.z / gl_FragCoord.w;\nfloat fogFactor = 0.0;\nif ( fogType == 1 ) {\nfogFactor = smoothstep( fogNear, fogFar, depth );\n} else {\nconst float LOG2 = 1.442695;\nfloat fogFactor = exp2( - fogDensity * fogDensity * depth * depth * LOG2 );\nfogFactor = 1.0 - clamp( fogFactor, 0.0, 1.0 );\n}\ngl_FragColor = mix( gl_FragColor, vec4( fogColor, gl_FragColor.w ), fogFactor );\n}\n}"}};
 
-/* Modernizr 2.6.2 (Custom Build) | MIT & BSD
- * Build: http://modernizr.com/download/#-canvas-webgl
- */
-;window.Modernizr=function(a,b,c){function t(a){i.cssText=a}function u(a,b){return t(prefixes.join(a+";")+(b||""))}function v(a,b){return typeof a===b}function w(a,b){return!!~(""+a).indexOf(b)}function x(a,b,d){for(var e in a){var f=b[a[e]];if(f!==c)return d===!1?a[e]:v(f,"function")?f.bind(d||b):f}return!1}var d="2.6.2",e={},f=b.documentElement,g="modernizr",h=b.createElement(g),i=h.style,j,k={}.toString,l={},m={},n={},o=[],p=o.slice,q,r={}.hasOwnProperty,s;!v(r,"undefined")&&!v(r.call,"undefined")?s=function(a,b){return r.call(a,b)}:s=function(a,b){return b in a&&v(a.constructor.prototype[b],"undefined")},Function.prototype.bind||(Function.prototype.bind=function(b){var c=this;if(typeof c!="function")throw new TypeError;var d=p.call(arguments,1),e=function(){if(this instanceof e){var a=function(){};a.prototype=c.prototype;var f=new a,g=c.apply(f,d.concat(p.call(arguments)));return Object(g)===g?g:f}return c.apply(b,d.concat(p.call(arguments)))};return e}),l.canvas=function(){var a=b.createElement("canvas");return!!a.getContext&&!!a.getContext("2d")},l.webgl=function(){return!!a.WebGLRenderingContext};for(var y in l)s(l,y)&&(q=y.toLowerCase(),e[q]=l[y](),o.push((e[q]?"":"no-")+q));return e.addTest=function(a,b){if(typeof a=="object")for(var d in a)s(a,d)&&e.addTest(d,a[d]);else{a=a.toLowerCase();if(e[a]!==c)return e;b=typeof b=="function"?b():b,typeof enableClasses!="undefined"&&enableClasses&&(f.className+=" "+(b?"":"no-")+a),e[a]=b}return e},t(""),h=j=null,e._version=d,e}(this,this.document);
 (function() {
   "use strict";
-  var OpenString, StringAnimation, reduce, setTimeout2;
+  var ClosedString, OpenString, String, StringAnimation, reduce, setTimeout2, _ref, _ref1,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   window.addEventListener("load", function() {
     var string_container, string_containers, string_name, _i, _len, _ref, _results;
@@ -732,33 +730,21 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
     return setTimeout(b, a);
   };
 
-  OpenString = (function() {
-    OpenString.prototype.regge_slope = 1 / 2;
+  String = (function() {
+    String.prototype.regge_slope = 1 / 2;
 
-    OpenString.prototype.tau_steps_per_fastest_revolution = 24;
+    String.prototype.tau_steps_per_fastest_revolution = 24;
 
-    function OpenString(modes) {
+    function String(modes) {
       this.modes = modes;
       this.stored_coordinates = {};
       this.calculate_velocity();
+      this.calculate_top_mode();
       this.calculate_simulation_properties();
     }
 
-    OpenString.prototype.calculate_velocity = function() {
-      var inverse_c_squared;
-
-      inverse_c_squared = 2 * this.regge_slope * Math.PI * Math.PI * reduce(this.modes, 0, function(sum, modesi) {
-        return sum + reduce(modesi, 0, function(sum1, mode) {
-          return sum1 + mode.a * mode.a + mode.b * mode.b;
-        });
-      });
-      this.c = 1 / Math.sqrt(inverse_c_squared);
-      this.x_i_factor = 2 * Math.sqrt(2 * this.regge_slope);
-      return this.y_m_factor = -Math.PI * this.c * 2 * this.regge_slope;
-    };
-
-    OpenString.prototype.calculate_simulation_properties = function() {
-      this.top_mode = reduce(this.modes, 0, function(top0, modesi) {
+    String.prototype.calculate_top_mode = function() {
+      return this.top_mode = reduce(this.modes, 0, function(top0, modesi) {
         var top;
 
         top = reduce(modesi, 0, function(top1, mode) {
@@ -766,45 +752,16 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
         });
         return Math.max(top0, top);
       });
-      return this.tau_increment = 1 / (this.c * this.top_mode * this.tau_steps_per_fastest_revolution);
     };
 
-    OpenString.prototype.x_i = function(i, tau, sigma) {
-      var vsigma, vtau;
-
-      vtau = Math.PI * tau * this.c;
-      vsigma = Math.PI * sigma;
-      return this.x_i_factor * reduce(this.modes[i - 2], 0, function(sum, mode) {
-        return sum + (mode.a * Math.sin(mode.n * vtau) - mode.b * Math.cos(mode.n * vtau)) * Math.cos(mode.n * vsigma) / mode.n;
-      });
-    };
-
-    OpenString.prototype.y_m = function(tau, sigma) {
-      var vsigma, vtau;
-
-      vtau = Math.PI * tau * this.c;
-      vsigma = Math.PI * sigma;
-      return this.y_m_factor * reduce(this.modes, 0, function(sum, modesi) {
-        return sum + reduce(modesi, 0, function(sum1, mode1) {
-          return sum1 + reduce(modesi, 0, function(sum2, mode2) {
-            sum2 += ((mode1.b * mode2.a + mode1.a * mode2.b) * Math.cos((mode1.n + mode2.n) * vtau) + (mode1.b * mode2.b - mode1.a * mode2.a) * Math.sin((mode1.n + mode2.n) * vtau)) * Math.cos((mode1.n + mode2.n) * vsigma) / (mode1.n + mode2.n);
-            if (mode1.n !== mode2.n) {
-              sum2 += ((mode1.b * mode2.a - mode1.a * mode2.b) * Math.cos((mode1.n - mode2.n) * vtau) - (mode1.b * mode2.b + mode1.a * mode2.a) * Math.sin((mode1.n - mode2.n) * vtau)) * Math.cos((mode1.n - mode2.n) * vsigma) / (mode1.n - mode2.n);
-            }
-            return sum2;
-          });
-        });
-      });
-    };
-
-    OpenString.prototype.coordinates = function(tau, sigma) {
+    String.prototype.coordinates = function(tau, sigma) {
       var y_m;
 
       y_m = this.y_m(tau, sigma);
       return [(2 * tau + y_m) / Math.sqrt(2), y_m / Math.sqrt(2), this.x_i(2, tau, sigma), this.x_i(3, tau, sigma)];
     };
 
-    OpenString.prototype.coordinates_at_global_time = function(t, sigma) {
+    String.prototype.coordinates_at_global_time = function(t, sigma) {
       var coords_high, coords_low, iterations, tau_high, tau_low, w;
 
       if (this.stored_coordinates[sigma]) {
@@ -843,15 +800,134 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
       return [(1 - w) * coords_low[1] + w * coords_high[1], (1 - w) * coords_low[2] + w * coords_high[2], (1 - w) * coords_low[3] + w * coords_high[3]];
     };
 
-    return OpenString;
+    return String;
 
   })();
+
+  OpenString = (function(_super) {
+    __extends(OpenString, _super);
+
+    function OpenString() {
+      _ref = OpenString.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    OpenString.prototype.calculate_velocity = function() {
+      var inverse_c_squared;
+
+      inverse_c_squared = 2 * this.regge_slope * Math.PI * Math.PI * reduce(this.modes, 0, function(sum, modesi) {
+        return sum + reduce(modesi, 0, function(sum1, mode) {
+          return sum1 + mode.a * mode.a + mode.b * mode.b;
+        });
+      });
+      this.c = 1 / Math.sqrt(inverse_c_squared);
+      this.x_i_factor = 2 * Math.sqrt(2 * this.regge_slope);
+      return this.y_m_factor = -Math.PI * this.c * 2 * this.regge_slope;
+    };
+
+    OpenString.prototype.calculate_simulation_properties = function() {
+      return this.tau_increment = 1 / (this.c * this.top_mode * this.tau_steps_per_fastest_revolution);
+    };
+
+    OpenString.prototype.x_i = function(i, tau, sigma) {
+      var vsigma, vtau;
+
+      vtau = Math.PI * tau * this.c;
+      vsigma = Math.PI * sigma;
+      return this.x_i_factor * reduce(this.modes[i - 2], 0, function(sum, mode) {
+        return sum + (mode.a * Math.sin(mode.n * vtau) - mode.b * Math.cos(mode.n * vtau)) * Math.cos(mode.n * vsigma) / mode.n;
+      });
+    };
+
+    OpenString.prototype.y_m = function(tau, sigma) {
+      var vsigma, vtau;
+
+      vtau = Math.PI * tau * this.c;
+      vsigma = Math.PI * sigma;
+      return this.y_m_factor * reduce(this.modes, 0, function(sum, modesi) {
+        return sum + reduce(modesi, 0, function(sum1, mode1) {
+          return sum1 + reduce(modesi, 0, function(sum2, mode2) {
+            sum2 += ((mode1.b * mode2.a + mode1.a * mode2.b) * Math.cos((mode1.n + mode2.n) * vtau) + (mode1.b * mode2.b - mode1.a * mode2.a) * Math.sin((mode1.n + mode2.n) * vtau)) * Math.cos((mode1.n + mode2.n) * vsigma) / (mode1.n + mode2.n);
+            if (mode1.n !== mode2.n) {
+              sum2 += ((mode1.b * mode2.a - mode1.a * mode2.b) * Math.cos((mode1.n - mode2.n) * vtau) - (mode1.b * mode2.b + mode1.a * mode2.a) * Math.sin((mode1.n - mode2.n) * vtau)) * Math.cos((mode1.n - mode2.n) * vsigma) / (mode1.n - mode2.n);
+            }
+            return sum2;
+          });
+        });
+      });
+    };
+
+    return OpenString;
+
+  })(String);
+
+  ClosedString = (function(_super) {
+    __extends(ClosedString, _super);
+
+    function ClosedString() {
+      _ref1 = ClosedString.__super__.constructor.apply(this, arguments);
+      return _ref1;
+    }
+
+    ClosedString.prototype.calculate_velocity = function() {
+      var inverse_c_squared;
+
+      inverse_c_squared = 4 * this.regge_slope * Math.PI * Math.PI * reduce(this.modes, 0, function(sum, modesi) {
+        return sum + reduce(modesi, 0, function(sum1, mode) {
+          return sum1 + mode.a1 * mode.a1 + mode.b1 * mode.b1 + mode.a2 * mode.a2 + mode.b2 * mode.b2;
+        });
+      });
+      this.c = 1 / Math.sqrt(inverse_c_squared);
+      this.x_i_factor = Math.sqrt(2 * this.regge_slope);
+      return this.y_m_factor = -Math.PI * this.c * 2 * this.regge_slope;
+    };
+
+    ClosedString.prototype.calculate_simulation_properties = function() {
+      return this.tau_increment = 1 / (2 * this.c * this.top_mode * this.tau_steps_per_fastest_revolution);
+    };
+
+    ClosedString.prototype.x_i = function(i, tau, sigma) {
+      var vminus, vplus;
+
+      vplus = 2 * Math.PI * (this.c * tau + sigma);
+      vminus = 2 * Math.PI * (this.c * tau - sigma);
+      return this.x_i_factor * reduce(this.modes[i - 2], 0, function(sum, mode) {
+        return sum + (mode.a1 * Math.sin(mode.n * vplus) - mode.b1 * Math.cos(mode.n * vplus) + mode.a2 * Math.sin(mode.n * vminus) - mode.b2 * Math.cos(mode.n * vminus)) / mode.n;
+      });
+    };
+
+    ClosedString.prototype.y_m = function(tau, sigma) {
+      var vminus, vplus;
+
+      vplus = 2 * Math.PI * (this.c * tau + sigma);
+      vminus = 2 * Math.PI * (this.c * tau - sigma);
+      return this.y_m_factor * reduce(this.modes, 0, function(sum, modesi) {
+        return sum + reduce(modesi, 0, function(sum1, mode1) {
+          return sum1 + reduce(modesi, 0, function(sum2, mode2) {
+            sum2 += ((mode1.b1 * mode2.a1 + mode1.a1 * mode2.b1) * Math.cos((mode1.n + mode2.n) * vplus) + (mode1.b1 * mode2.b1 - mode1.a1 * mode2.a1) * Math.sin((mode1.n + mode2.n) * vplus)) / (mode1.n + mode2.n);
+            if (mode1.n !== mode2.n) {
+              sum2 += ((mode1.b1 * mode2.a1 - mode1.a1 * mode2.b1) * Math.cos((mode1.n - mode2.n) * vplus) - (mode1.b1 * mode2.b1 + mode1.a1 * mode2.a1) * Math.sin((mode1.n - mode2.n) * vplus)) / (mode1.n - mode2.n);
+            }
+            sum2 += ((mode1.b2 * mode2.a2 + mode1.a2 * mode2.b2) * Math.cos((mode1.n + mode2.n) * vminus) + (mode1.b2 * mode2.b2 - mode1.a2 * mode2.a2) * Math.sin((mode1.n + mode2.n) * vminus)) / (mode1.n + mode2.n);
+            if (mode1.n !== mode2.n) {
+              sum2 += ((mode1.b2 * mode2.a2 - mode1.a2 * mode2.b2) * Math.cos((mode1.n - mode2.n) * vminus) - (mode1.b2 * mode2.b2 + mode1.a2 * mode2.a2) * Math.sin((mode1.n - mode2.n) * vminus)) / (mode1.n - mode2.n);
+            }
+            return sum2;
+          });
+        });
+      });
+    };
+
+    return ClosedString;
+
+  })(String);
 
   StringAnimation = (function() {
     StringAnimation.prototype.string_segments = 48;
 
     function StringAnimation(containers) {
       this.containers = containers;
+      this.open_string = true;
       this.init_controls();
       this.init_animation();
       this.init_drawing();
@@ -860,11 +936,11 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
 
     StringAnimation.prototype.find_in_containers = function(selector) {
       return reduce(this.containers, [], function(list, container) {
-        var element, _i, _len, _ref;
+        var element, _i, _len, _ref2;
 
-        _ref = container.querySelectorAll(selector);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          element = _ref[_i];
+        _ref2 = container.querySelectorAll(selector);
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          element = _ref2[_i];
           list.push(element);
         }
         return list;
@@ -873,22 +949,27 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
 
     StringAnimation.prototype.init_animation = function() {
       this.clock = new THREE.Clock();
-      return this.update_modes();
+      return this.update_string();
     };
 
-    StringAnimation.prototype.update_modes = function() {
+    StringAnimation.prototype.update_string = function() {
       var modes;
 
       modes = JSON.parse(this.mode_control_textarea.value);
-      return this.string = new OpenString(modes);
+      return this.string = this.open_string ? new OpenString(modes) : new ClosedString(modes);
     };
 
     StringAnimation.prototype.init_controls = function() {
       var _this = this;
 
       this.mode_control_textarea = this.find_in_containers("textarea.string-modes")[0];
-      return this.mode_control_textarea.addEventListener("blur", function() {
-        return _this.update_modes();
+      this.mode_control_textarea.addEventListener("blur", function() {
+        return _this.update_string();
+      });
+      this.type_control_button = this.find_in_containers("button.string-type")[0];
+      return this.type_control_button.addEventListener("click", function() {
+        _this.open_string = !_this.open_string;
+        return _this.update_string();
       });
     };
 
@@ -951,10 +1032,10 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
       var i;
 
       return this.string_vertices = (function() {
-        var _i, _ref, _results;
+        var _i, _ref2, _results;
 
         _results = [];
-        for (i = _i = 0, _ref = this.string_segments; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        for (i = _i = 0, _ref2 = this.string_segments; 0 <= _ref2 ? _i <= _ref2 : _i >= _ref2; i = 0 <= _ref2 ? ++_i : --_i) {
           _results.push(this.string_coordinates(this.clock.elapsedTime, i / this.string_segments));
         }
         return _results;

@@ -185,6 +185,7 @@ class StringAnimation
 	string_segments: 48
 
 	constructor: (@containers) ->
+		@open_string = true
 		@init_controls()
 		@init_animation()
 		@init_drawing()
@@ -198,16 +199,25 @@ class StringAnimation
 
 	init_animation: () ->
 		@clock = new THREE.Clock()
-		@update_modes()
+		@update_string()
 
-	update_modes: () ->
+	update_string: () ->
 		modes = JSON.parse(@mode_control_textarea.value)
-		@string = new OpenString(modes)
+		@string =
+			if @open_string
+				new OpenString(modes)
+			else
+				new ClosedString(modes)
 
 	init_controls: () ->
 		@mode_control_textarea = @find_in_containers("textarea.string-modes")[0]
 		@mode_control_textarea.addEventListener "blur", =>
-			@update_modes()
+			@update_string()
+
+		@type_control_button = @find_in_containers("button.string-type")[0]
+		@type_control_button.addEventListener "click", =>
+			@open_string = !@open_string
+			@update_string()
 
 	init_drawing: () ->
 		@canvas = @find_in_containers("canvas.string-display")[0]

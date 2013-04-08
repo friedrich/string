@@ -1,6 +1,8 @@
 (function() {
   "use strict";
-  var OpenString, StringAnimation, reduce, setTimeout2;
+  var ClosedString, OpenString, String, StringAnimation, reduce, setTimeout2, _ref, _ref1,
+    __hasProp = {}.hasOwnProperty,
+    __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
   window.addEventListener("load", function() {
     var string_container, string_containers, string_name, _i, _len, _ref, _results;
@@ -28,33 +30,21 @@
     return setTimeout(b, a);
   };
 
-  OpenString = (function() {
-    OpenString.prototype.regge_slope = 1 / 2;
+  String = (function() {
+    String.prototype.regge_slope = 1 / 2;
 
-    OpenString.prototype.tau_steps_per_fastest_revolution = 24;
+    String.prototype.tau_steps_per_fastest_revolution = 24;
 
-    function OpenString(modes) {
+    function String(modes) {
       this.modes = modes;
       this.stored_coordinates = {};
       this.calculate_velocity();
+      this.calculate_top_mode();
       this.calculate_simulation_properties();
     }
 
-    OpenString.prototype.calculate_velocity = function() {
-      var inverse_c_squared;
-
-      inverse_c_squared = 2 * this.regge_slope * Math.PI * Math.PI * reduce(this.modes, 0, function(sum, modesi) {
-        return sum + reduce(modesi, 0, function(sum1, mode) {
-          return sum1 + mode.a * mode.a + mode.b * mode.b;
-        });
-      });
-      this.c = 1 / Math.sqrt(inverse_c_squared);
-      this.x_i_factor = 2 * Math.sqrt(2 * this.regge_slope);
-      return this.y_m_factor = -Math.PI * this.c * 2 * this.regge_slope;
-    };
-
-    OpenString.prototype.calculate_simulation_properties = function() {
-      this.top_mode = reduce(this.modes, 0, function(top0, modesi) {
+    String.prototype.calculate_top_mode = function() {
+      return this.top_mode = reduce(this.modes, 0, function(top0, modesi) {
         var top;
 
         top = reduce(modesi, 0, function(top1, mode) {
@@ -62,45 +52,16 @@
         });
         return Math.max(top0, top);
       });
-      return this.tau_increment = 1 / (this.c * this.top_mode * this.tau_steps_per_fastest_revolution);
     };
 
-    OpenString.prototype.x_i = function(i, tau, sigma) {
-      var vsigma, vtau;
-
-      vtau = Math.PI * tau * this.c;
-      vsigma = Math.PI * sigma;
-      return this.x_i_factor * reduce(this.modes[i - 2], 0, function(sum, mode) {
-        return sum + (mode.a * Math.sin(mode.n * vtau) - mode.b * Math.cos(mode.n * vtau)) * Math.cos(mode.n * vsigma) / mode.n;
-      });
-    };
-
-    OpenString.prototype.y_m = function(tau, sigma) {
-      var vsigma, vtau;
-
-      vtau = Math.PI * tau * this.c;
-      vsigma = Math.PI * sigma;
-      return this.y_m_factor * reduce(this.modes, 0, function(sum, modesi) {
-        return sum + reduce(modesi, 0, function(sum1, mode1) {
-          return sum1 + reduce(modesi, 0, function(sum2, mode2) {
-            sum2 += ((mode1.b * mode2.a + mode1.a * mode2.b) * Math.cos((mode1.n + mode2.n) * vtau) + (mode1.b * mode2.b - mode1.a * mode2.a) * Math.sin((mode1.n + mode2.n) * vtau)) * Math.cos((mode1.n + mode2.n) * vsigma) / (mode1.n + mode2.n);
-            if (mode1.n !== mode2.n) {
-              sum2 += ((mode1.b * mode2.a - mode1.a * mode2.b) * Math.cos((mode1.n - mode2.n) * vtau) - (mode1.b * mode2.b + mode1.a * mode2.a) * Math.sin((mode1.n - mode2.n) * vtau)) * Math.cos((mode1.n - mode2.n) * vsigma) / (mode1.n - mode2.n);
-            }
-            return sum2;
-          });
-        });
-      });
-    };
-
-    OpenString.prototype.coordinates = function(tau, sigma) {
+    String.prototype.coordinates = function(tau, sigma) {
       var y_m;
 
       y_m = this.y_m(tau, sigma);
       return [(2 * tau + y_m) / Math.sqrt(2), y_m / Math.sqrt(2), this.x_i(2, tau, sigma), this.x_i(3, tau, sigma)];
     };
 
-    OpenString.prototype.coordinates_at_global_time = function(t, sigma) {
+    String.prototype.coordinates_at_global_time = function(t, sigma) {
       var coords_high, coords_low, iterations, tau_high, tau_low, w;
 
       if (this.stored_coordinates[sigma]) {
@@ -139,15 +100,134 @@
       return [(1 - w) * coords_low[1] + w * coords_high[1], (1 - w) * coords_low[2] + w * coords_high[2], (1 - w) * coords_low[3] + w * coords_high[3]];
     };
 
-    return OpenString;
+    return String;
 
   })();
+
+  OpenString = (function(_super) {
+    __extends(OpenString, _super);
+
+    function OpenString() {
+      _ref = OpenString.__super__.constructor.apply(this, arguments);
+      return _ref;
+    }
+
+    OpenString.prototype.calculate_velocity = function() {
+      var inverse_c_squared;
+
+      inverse_c_squared = 2 * this.regge_slope * Math.PI * Math.PI * reduce(this.modes, 0, function(sum, modesi) {
+        return sum + reduce(modesi, 0, function(sum1, mode) {
+          return sum1 + mode.a * mode.a + mode.b * mode.b;
+        });
+      });
+      this.c = 1 / Math.sqrt(inverse_c_squared);
+      this.x_i_factor = 2 * Math.sqrt(2 * this.regge_slope);
+      return this.y_m_factor = -Math.PI * this.c * 2 * this.regge_slope;
+    };
+
+    OpenString.prototype.calculate_simulation_properties = function() {
+      return this.tau_increment = 1 / (this.c * this.top_mode * this.tau_steps_per_fastest_revolution);
+    };
+
+    OpenString.prototype.x_i = function(i, tau, sigma) {
+      var vsigma, vtau;
+
+      vtau = Math.PI * tau * this.c;
+      vsigma = Math.PI * sigma;
+      return this.x_i_factor * reduce(this.modes[i - 2], 0, function(sum, mode) {
+        return sum + (mode.a * Math.sin(mode.n * vtau) - mode.b * Math.cos(mode.n * vtau)) * Math.cos(mode.n * vsigma) / mode.n;
+      });
+    };
+
+    OpenString.prototype.y_m = function(tau, sigma) {
+      var vsigma, vtau;
+
+      vtau = Math.PI * tau * this.c;
+      vsigma = Math.PI * sigma;
+      return this.y_m_factor * reduce(this.modes, 0, function(sum, modesi) {
+        return sum + reduce(modesi, 0, function(sum1, mode1) {
+          return sum1 + reduce(modesi, 0, function(sum2, mode2) {
+            sum2 += ((mode1.b * mode2.a + mode1.a * mode2.b) * Math.cos((mode1.n + mode2.n) * vtau) + (mode1.b * mode2.b - mode1.a * mode2.a) * Math.sin((mode1.n + mode2.n) * vtau)) * Math.cos((mode1.n + mode2.n) * vsigma) / (mode1.n + mode2.n);
+            if (mode1.n !== mode2.n) {
+              sum2 += ((mode1.b * mode2.a - mode1.a * mode2.b) * Math.cos((mode1.n - mode2.n) * vtau) - (mode1.b * mode2.b + mode1.a * mode2.a) * Math.sin((mode1.n - mode2.n) * vtau)) * Math.cos((mode1.n - mode2.n) * vsigma) / (mode1.n - mode2.n);
+            }
+            return sum2;
+          });
+        });
+      });
+    };
+
+    return OpenString;
+
+  })(String);
+
+  ClosedString = (function(_super) {
+    __extends(ClosedString, _super);
+
+    function ClosedString() {
+      _ref1 = ClosedString.__super__.constructor.apply(this, arguments);
+      return _ref1;
+    }
+
+    ClosedString.prototype.calculate_velocity = function() {
+      var inverse_c_squared;
+
+      inverse_c_squared = 4 * this.regge_slope * Math.PI * Math.PI * reduce(this.modes, 0, function(sum, modesi) {
+        return sum + reduce(modesi, 0, function(sum1, mode) {
+          return sum1 + mode.a1 * mode.a1 + mode.b1 * mode.b1 + mode.a2 * mode.a2 + mode.b2 * mode.b2;
+        });
+      });
+      this.c = 1 / Math.sqrt(inverse_c_squared);
+      this.x_i_factor = Math.sqrt(2 * this.regge_slope);
+      return this.y_m_factor = -Math.PI * this.c * 2 * this.regge_slope;
+    };
+
+    ClosedString.prototype.calculate_simulation_properties = function() {
+      return this.tau_increment = 1 / (2 * this.c * this.top_mode * this.tau_steps_per_fastest_revolution);
+    };
+
+    ClosedString.prototype.x_i = function(i, tau, sigma) {
+      var vminus, vplus;
+
+      vplus = 2 * Math.PI * (this.c * tau + sigma);
+      vminus = 2 * Math.PI * (this.c * tau - sigma);
+      return this.x_i_factor * reduce(this.modes[i - 2], 0, function(sum, mode) {
+        return sum + (mode.a1 * Math.sin(mode.n * vplus) - mode.b1 * Math.cos(mode.n * vplus) + mode.a2 * Math.sin(mode.n * vminus) - mode.b2 * Math.cos(mode.n * vminus)) / mode.n;
+      });
+    };
+
+    ClosedString.prototype.y_m = function(tau, sigma) {
+      var vminus, vplus;
+
+      vplus = 2 * Math.PI * (this.c * tau + sigma);
+      vminus = 2 * Math.PI * (this.c * tau - sigma);
+      return this.y_m_factor * reduce(this.modes, 0, function(sum, modesi) {
+        return sum + reduce(modesi, 0, function(sum1, mode1) {
+          return sum1 + reduce(modesi, 0, function(sum2, mode2) {
+            sum2 += ((mode1.b1 * mode2.a1 + mode1.a1 * mode2.b1) * Math.cos((mode1.n + mode2.n) * vplus) + (mode1.b1 * mode2.b1 - mode1.a1 * mode2.a1) * Math.sin((mode1.n + mode2.n) * vplus)) / (mode1.n + mode2.n);
+            if (mode1.n !== mode2.n) {
+              sum2 += ((mode1.b1 * mode2.a1 - mode1.a1 * mode2.b1) * Math.cos((mode1.n - mode2.n) * vplus) - (mode1.b1 * mode2.b1 + mode1.a1 * mode2.a1) * Math.sin((mode1.n - mode2.n) * vplus)) / (mode1.n - mode2.n);
+            }
+            sum2 += ((mode1.b2 * mode2.a2 + mode1.a2 * mode2.b2) * Math.cos((mode1.n + mode2.n) * vminus) + (mode1.b2 * mode2.b2 - mode1.a2 * mode2.a2) * Math.sin((mode1.n + mode2.n) * vminus)) / (mode1.n + mode2.n);
+            if (mode1.n !== mode2.n) {
+              sum2 += ((mode1.b2 * mode2.a2 - mode1.a2 * mode2.b2) * Math.cos((mode1.n - mode2.n) * vminus) - (mode1.b2 * mode2.b2 + mode1.a2 * mode2.a2) * Math.sin((mode1.n - mode2.n) * vminus)) / (mode1.n - mode2.n);
+            }
+            return sum2;
+          });
+        });
+      });
+    };
+
+    return ClosedString;
+
+  })(String);
 
   StringAnimation = (function() {
     StringAnimation.prototype.string_segments = 48;
 
     function StringAnimation(containers) {
       this.containers = containers;
+      this.open_string = true;
       this.init_controls();
       this.init_animation();
       this.init_drawing();
@@ -156,11 +236,11 @@
 
     StringAnimation.prototype.find_in_containers = function(selector) {
       return reduce(this.containers, [], function(list, container) {
-        var element, _i, _len, _ref;
+        var element, _i, _len, _ref2;
 
-        _ref = container.querySelectorAll(selector);
-        for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-          element = _ref[_i];
+        _ref2 = container.querySelectorAll(selector);
+        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
+          element = _ref2[_i];
           list.push(element);
         }
         return list;
@@ -169,22 +249,27 @@
 
     StringAnimation.prototype.init_animation = function() {
       this.clock = new THREE.Clock();
-      return this.update_modes();
+      return this.update_string();
     };
 
-    StringAnimation.prototype.update_modes = function() {
+    StringAnimation.prototype.update_string = function() {
       var modes;
 
       modes = JSON.parse(this.mode_control_textarea.value);
-      return this.string = new OpenString(modes);
+      return this.string = this.open_string ? new OpenString(modes) : new ClosedString(modes);
     };
 
     StringAnimation.prototype.init_controls = function() {
       var _this = this;
 
       this.mode_control_textarea = this.find_in_containers("textarea.string-modes")[0];
-      return this.mode_control_textarea.addEventListener("blur", function() {
-        return _this.update_modes();
+      this.mode_control_textarea.addEventListener("blur", function() {
+        return _this.update_string();
+      });
+      this.type_control_button = this.find_in_containers("button.string-type")[0];
+      return this.type_control_button.addEventListener("click", function() {
+        _this.open_string = !_this.open_string;
+        return _this.update_string();
       });
     };
 
@@ -247,10 +332,10 @@
       var i;
 
       return this.string_vertices = (function() {
-        var _i, _ref, _results;
+        var _i, _ref2, _results;
 
         _results = [];
-        for (i = _i = 0, _ref = this.string_segments; 0 <= _ref ? _i <= _ref : _i >= _ref; i = 0 <= _ref ? ++_i : --_i) {
+        for (i = _i = 0, _ref2 = this.string_segments; 0 <= _ref2 ? _i <= _ref2 : _i >= _ref2; i = 0 <= _ref2 ? ++_i : --_i) {
           _results.push(this.string_coordinates(this.clock.elapsedTime, i / this.string_segments));
         }
         return _results;
