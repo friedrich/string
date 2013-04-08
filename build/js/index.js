@@ -981,8 +981,11 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
       var e, material_parameters, renderer_parameters;
 
       this.canvas = this.find_in_containers("canvas.string-display")[0];
+      this.viewport_width = this.canvas.scrollWidth;
+      this.viewport_height = this.canvas.scrollHeight;
       renderer_parameters = {
         canvas: this.canvas,
+        alpha: false,
         stencil: false
       };
       try {
@@ -999,21 +1002,88 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
         console.log("No 3d support");
         return;
       }
-      this.renderer.setSize(this.canvas.scrollWidth, this.canvas.scrollHeight);
+      this.renderer.autoClear = false;
+      this.renderer.setClearColorHex(0xffffff, 1);
+      this.renderer.setSize(this.viewport_width, this.viewport_height);
       this.scene = new THREE.Scene();
+      this.overlay_scene = new THREE.Scene();
       material_parameters = {
         color: 0,
         linewidth: 1
       };
       this.string_geometry = new THREE.Geometry();
       this.string_material = new THREE.LineBasicMaterial(material_parameters);
-      this.string_line = new THREE.Line(this.string_geometry, this.string_material);
-      this.scene.add(this.string_line);
+      this.string_object = new THREE.Line(this.string_geometry, this.string_material);
+      this.string_object.useQuaternion = true;
+      this.scene.add(this.string_object);
       this.update_scene();
-      this.camera = new THREE.PerspectiveCamera(75, this.canvas.width / this.canvas.height, 0.1, 1000);
-      this.camera.position = new THREE.Vector3(2, 0, 0);
-      this.camera.up = new THREE.Vector3(0, 0, 1);
-      return this.camera.lookAt(new THREE.Vector3(0, this.camera.position.y, this.camera.position.z));
+      this.axis_object = new THREE.Object3D();
+      this.axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), new THREE.Vector3(), 1, 0xff0000));
+      this.axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), 1, 0x00ff00));
+      this.axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(), 1, 0x0000ff));
+      this.axis_object.scale = new THREE.Vector3(0.15, 0.15, 0.15);
+      this.axis_object.position = new THREE.Vector3(0.2 - 1, 0.2 - this.viewport_height / this.viewport_width, 0);
+      this.axis_object.useQuaternion = true;
+      this.overlay_scene.add(this.axis_object);
+      this.camera = new THREE.PerspectiveCamera(75, this.viewport_width / this.viewport_height, 0.1, 1000);
+      this.camera.position = new THREE.Vector3(0, 0, 2);
+      this.camera.up = new THREE.Vector3(0, 1, 0);
+      this.camera.lookAt(new THREE.Vector3());
+      this.overlay_camera = new THREE.OrthographicCamera(-1, 1, this.viewport_height / this.viewport_width, -this.viewport_height / this.viewport_width);
+      this.overlay_camera.position = new THREE.Vector3(0, 0, 10);
+      this.overlay_camera.up = new THREE.Vector3(0, 1, 0);
+      this.overlay_camera.lookAt(new THREE.Vector3());
+      this.vertical_rotation = 0;
+      this.horizontal_rotation = 0;
+      this.update_camera();
+      return this.setup_rotation_control();
+    };
+
+    StringAnimation.prototype.setup_rotation_control = function() {
+      var mouse_move_listener, prev_mouse_position,
+        _this = this;
+
+      prev_mouse_position = {};
+      mouse_move_listener = function(event) {
+        var mouse_difference, mouse_position;
+
+        mouse_position = {
+          x: event.x,
+          y: event.y
+        };
+        mouse_difference = {
+          x: mouse_position.x - prev_mouse_position.x,
+          y: mouse_position.y - prev_mouse_position.y
+        };
+        prev_mouse_position = mouse_position;
+        _this.vertical_rotation += 4 * Math.PI * mouse_difference.x / _this.viewport_width;
+        _this.horizontal_rotation += 4 * Math.PI * mouse_difference.y / _this.viewport_height;
+        _this.horizontal_rotation = Math.max(_this.horizontal_rotation, -Math.PI / 2);
+        _this.horizontal_rotation = Math.min(_this.horizontal_rotation, Math.PI / 2);
+        return _this.update_camera();
+      };
+      this.canvas.addEventListener("mousedown", function(event) {
+        prev_mouse_position = {
+          x: event.x,
+          y: event.y
+        };
+        return _this.canvas.addEventListener("mousemove", mouse_move_listener);
+      });
+      this.canvas.addEventListener("mouseup", function() {
+        return _this.canvas.removeEventListener("mousemove", mouse_move_listener);
+      });
+      return this.canvas.addEventListener("mouseout", function() {
+        return _this.canvas.removeEventListener("mousemove", mouse_move_listener);
+      });
+    };
+
+    StringAnimation.prototype.update_camera = function() {
+      var rotation;
+
+      rotation = new THREE.Quaternion();
+      rotation.setFromEuler(new THREE.Vector3(this.horizontal_rotation, 0, this.vertical_rotation));
+      this.axis_object.quaternion = rotation;
+      return this.string_object.quaternion = rotation;
     };
 
     StringAnimation.prototype.main_loop = function() {
@@ -1024,7 +1094,9 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
       });
       this.animate_frame(this.clock.getDelta());
       this.update_scene();
-      return this.renderer.render(this.scene, this.camera);
+      this.renderer.clear(true, true, false);
+      this.renderer.render(this.scene, this.camera);
+      return this.renderer.render(this.overlay_scene, this.overlay_camera);
     };
 
     StringAnimation.prototype.update_scene = function() {
@@ -1050,7 +1122,11 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
       var coords;
 
       coords = this.string.coordinates_at_global_time(t, sigma);
-      return new THREE.Vector3(coords[2], coords[0], coords[1]);
+      return (function(func, args, ctor) {
+        ctor.prototype = func.prototype;
+        var child = new ctor, result = func.apply(child, args);
+        return Object(result) === result ? result : child;
+      })(THREE.Vector3, coords, function(){});
     };
 
     return StringAnimation;

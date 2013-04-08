@@ -198,11 +198,11 @@ class StringAnimation
 				list.push(element)
 			list
 
-	init_animation: () ->
+	init_animation: ->
 		@clock = new THREE.Clock()
 		@update_string()
 
-	update_string: () ->
+	update_string: ->
 		modes = JSON.parse(@mode_control_textarea.value)
 		@string =
 			if @open_string
@@ -210,7 +210,7 @@ class StringAnimation
 			else
 				new ClosedString(modes)
 
-	init_controls: () ->
+	init_controls: ->
 		@mode_control_textarea = @find_in_containers("textarea.string-modes")[0]
 		if @mode_control_textarea
 			@mode_control_textarea.addEventListener "blur", =>
@@ -222,7 +222,7 @@ class StringAnimation
 				@open_string = !@open_string
 				@update_string()
 
-	init_drawing: () ->
+	init_drawing: ->
 		@canvas = @find_in_containers("canvas.string-display")[0]
 		@viewport_width = @canvas.scrollWidth
 		@viewport_height = @canvas.scrollHeight
@@ -284,16 +284,46 @@ class StringAnimation
 		@overlay_camera.up = new THREE.Vector3(0, 1, 0)
 		@overlay_camera.lookAt(new THREE.Vector3())
 
-		@rotation = new THREE.Quaternion()
-		@rotation.setFromEuler(new THREE.Vector3(-Math.PI / 2, 0, -Math.PI / 2))
+		@vertical_rotation = 0
+		@horizontal_rotation = 0
 
 		@update_camera()
+		@setup_rotation_control()
 
-	update_camera: () ->
-		@axis_object.quaternion = @rotation
-		@string_object.quaternion = @rotation
+	setup_rotation_control: ->
+		prev_mouse_position = {}
 
-	main_loop: () ->
+		mouse_move_listener = (event) =>
+			mouse_position = { x: event.x, y: event.y }
+			mouse_difference =
+				x: mouse_position.x - prev_mouse_position.x
+				y: mouse_position.y - prev_mouse_position.y
+			prev_mouse_position = mouse_position
+
+			@vertical_rotation += 4 * Math.PI * mouse_difference.x / @viewport_width
+			@horizontal_rotation += 4 * Math.PI * mouse_difference.y / @viewport_height
+			@horizontal_rotation = Math.max(@horizontal_rotation, -Math.PI / 2)
+			@horizontal_rotation = Math.min(@horizontal_rotation, Math.PI / 2)
+
+			@update_camera()
+
+		@canvas.addEventListener "mousedown", (event) =>
+			prev_mouse_position = { x: event.x, y: event.y }
+			@canvas.addEventListener "mousemove", mouse_move_listener
+
+		@canvas.addEventListener "mouseup", =>
+			@canvas.removeEventListener "mousemove", mouse_move_listener
+		@canvas.addEventListener "mouseout", =>
+			@canvas.removeEventListener "mousemove", mouse_move_listener
+
+	update_camera: ->
+		rotation = new THREE.Quaternion()
+		rotation.setFromEuler(new THREE.Vector3(@horizontal_rotation, 0, @vertical_rotation))
+
+		@axis_object.quaternion = rotation
+		@string_object.quaternion = rotation
+
+	main_loop: ->
 		window.requestAnimationFrame =>
 			@main_loop()
 
@@ -304,7 +334,7 @@ class StringAnimation
 		@renderer.render(@scene, @camera)
 		@renderer.render(@overlay_scene, @overlay_camera)
 
-	update_scene: () ->
+	update_scene: ->
 		@string_geometry.vertices = @string_vertices
 		@string_geometry.verticesNeedUpdate = true
 
@@ -313,4 +343,4 @@ class StringAnimation
 
 	string_coordinates: (t, sigma) ->
 		coords = @string.coordinates_at_global_time(t, sigma)
-		return new THREE.Vector3(coords[2], coords[0], coords[1])
+		return new THREE.Vector3(coords...)
