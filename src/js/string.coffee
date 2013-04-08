@@ -16,6 +16,11 @@ reduce = (array, a, b) ->
 setTimeout2 = (a, b) ->
 	setTimeout(b, a)
 
+# * Length of the string equals one.
+# * Center of mass velocity is zero in all directions.
+# * Since x+ equals tau, it follows that the tau derivative of
+#   the center of mass of x- equals one.
+# * Value of c follows.
 class OpenString
 	regge_slope: 1 / 2
 	tau_steps_per_fastest_revolution: 24
@@ -26,25 +31,24 @@ class OpenString
 		@calculate_simulation_properties()
 
 	calculate_velocity: ->
-		# set the length of the string so that @x_m_velocity = 1 and the global frame is its rest frame
-		length_squared = Math.PI * Math.PI * 2 * @regge_slope * reduce @modes, 0, (sum, modesi) ->
+		inverse_c_squared = 2 * @regge_slope * Math.PI * Math.PI * reduce @modes, 0, (sum, modesi) ->
 			sum + reduce modesi, 0, (sum1, mode) ->
 				sum1 + mode.a * mode.a + mode.b * mode.b
-		@length = Math.sqrt(length_squared)
+		@c = 1 / Math.sqrt(inverse_c_squared)
 
 		@x_i_factor = 2 * Math.sqrt(2 * @regge_slope)
-		@y_m_factor = - Math.PI / @length * 2 * @regge_slope
+		@y_m_factor = - Math.PI * @c * 2 * @regge_slope
 
 	calculate_simulation_properties: ->
 		@top_mode = reduce @modes, 0, (top0, modesi) ->
 			top = reduce modesi, 0, (top1, mode) ->
 				Math.max(top1, mode.n)
 			Math.max(top0, top)
-		@tau_increment = @length / @top_mode / @tau_steps_per_fastest_revolution
+		@tau_increment = 1 / (@c * @top_mode * @tau_steps_per_fastest_revolution)
 
 	x_i: (i, tau, sigma) ->
-		vtau = Math.PI * tau / @length
-		vsigma = Math.PI * sigma / @length
+		vtau = Math.PI * tau * @c
+		vsigma = Math.PI * sigma
 
 		return @x_i_factor * reduce @modes[i-2], 0, (sum, mode) ->
 			sum + (
@@ -53,8 +57,8 @@ class OpenString
 			) * Math.cos(mode.n * vsigma) / mode.n
 
 	y_m: (tau, sigma) ->
-		vtau = Math.PI * tau / @length
-		vsigma = Math.PI * sigma / @length
+		vtau = Math.PI * tau * @c
+		vsigma = Math.PI * sigma
 
 		return @y_m_factor * reduce @modes, 0, (sum, modesi) ->
 			sum + reduce modesi, 0, (sum1, mode1) ->
@@ -200,7 +204,7 @@ class StringAnimation
 	animate_frame: (dt) ->
 		# @camera.position.x += dt;
 		# @camera.lookAt(new THREE.Vector3())
-		@string_vertices = (@string_coordinates(@clock.elapsedTime, i / @string_segments * @string.length) for i in [0..@string_segments])
+		@string_vertices = (@string_coordinates(@clock.elapsedTime, i / @string_segments) for i in [0..@string_segments])
 
 		# @string_vertices = []
 		# for a in [0..20]
