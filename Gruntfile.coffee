@@ -48,7 +48,6 @@ module.exports = (grunt) ->
 					"build/js/index.js": [
 						"src/js/vendor/jquery.js",
 						"src/js/vendor/three.js",
-						"src/js/vendor/modernizr.three.js",
 						"build/js/string.js"
 					]
 

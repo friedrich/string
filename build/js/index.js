@@ -893,18 +893,24 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
     };
 
     StringAnimation.prototype.init_drawing = function() {
-      var material_parameters, renderer_parameters;
+      var e, material_parameters, renderer_parameters;
 
       this.canvas = this.find_in_containers("canvas.string-display")[0];
       renderer_parameters = {
         canvas: this.canvas,
         stencil: false
       };
-      if (Modernizr.webgl) {
+      try {
         this.renderer = new THREE.WebGLRenderer(renderer_parameters);
-      } else if (Modernizr.canvas) {
-        this.renderer = new THREE.CanvasRenderer(renderer_parameters);
-      } else {
+      } catch (_error) {
+        e = _error;
+        try {
+          this.renderer = new THREE.CanvasRenderer(renderer_parameters);
+        } catch (_error) {
+          e = _error;
+        }
+      }
+      if (!this.renderer) {
         console.log("No 3d support");
         return;
       }

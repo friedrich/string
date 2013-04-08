@@ -159,11 +159,14 @@ class StringAnimation
 			canvas: @canvas
 			stencil: false
 
-		if Modernizr.webgl
+		try
 			@renderer = new THREE.WebGLRenderer(renderer_parameters)
-		else if Modernizr.canvas
-			@renderer = new THREE.CanvasRenderer(renderer_parameters)
-		else
+		catch e
+			try
+				@renderer = new THREE.CanvasRenderer(renderer_parameters)
+			catch e
+
+		unless @renderer
 			console.log("No 3d support")
 			return
 
