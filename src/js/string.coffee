@@ -229,6 +229,7 @@ class StringAnimation
 			canvas: @canvas
 			stencil: false
 
+		# TODO: use SVGRenderer?
 		try
 			@renderer = new THREE.WebGLRenderer(renderer_parameters)
 		catch e
@@ -263,9 +264,6 @@ class StringAnimation
 	main_loop: () ->
 		window.requestAnimationFrame =>
 			@main_loop()
-		# setTimeout2 50, =>
-		# 	window.requestAnimationFrame =>
-		# 		@main_loop()
 
 		@animate_frame(@clock.getDelta())
 		@update_scene()
@@ -276,20 +274,8 @@ class StringAnimation
 		@string_geometry.verticesNeedUpdate = true
 
 	animate_frame: (dt) ->
-		# @camera.position.x += dt;
-		# @camera.lookAt(new THREE.Vector3())
 		@string_vertices = (@string_coordinates(@clock.elapsedTime, i / @string_segments) for i in [0..@string_segments])
-
-		# @string_vertices = []
-		# for a in [0..20]
-		# 	vertices = (@string_coordinates(a * 0.05, i / @string_segments) for i in [0..@string_segments])
-		# 	@string_vertices = @string_vertices.concat(vertices)
 
 	string_coordinates: (t, sigma) ->
 		coords = @string.coordinates_at_global_time(t, sigma)
 		return new THREE.Vector3(coords[2], coords[0], coords[1])
-		# new THREE.Vector3(
-		# 	Math.sin(t) * Math.sin(2 * Math.PI * sigma) + Math.sin(2 * t) * Math.sin(8 * Math.PI * sigma),
-		# 	Math.sin(t) * Math.cos(2 * Math.PI * sigma) + Math.sin(2 * t) * Math.cos(8 * Math.PI * sigma),
-		# 	0
-		# )
