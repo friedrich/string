@@ -21,57 +21,21 @@ setTimeout2 = (a, b) ->
 # * Since x+ equals tau, it follows that the tau derivative of
 #   the center of mass of x- equals one.
 # * Value of c follows.
-class OpenString
+class String
 	regge_slope: 1 / 2
 	tau_steps_per_fastest_revolution: 24
 
 	constructor: (@modes) ->
 		@stored_coordinates = {}
 		@calculate_velocity()
+		@calculate_top_mode()
 		@calculate_simulation_properties()
 
-	calculate_velocity: ->
-		inverse_c_squared = 2 * @regge_slope * Math.PI * Math.PI * reduce @modes, 0, (sum, modesi) ->
-			sum + reduce modesi, 0, (sum1, mode) ->
-				sum1 + mode.a * mode.a + mode.b * mode.b
-		@c = 1 / Math.sqrt(inverse_c_squared)
-
-		@x_i_factor = 2 * Math.sqrt(2 * @regge_slope)
-		@y_m_factor = - Math.PI * @c * 2 * @regge_slope
-
-	calculate_simulation_properties: ->
+	calculate_top_mode: ->
 		@top_mode = reduce @modes, 0, (top0, modesi) ->
 			top = reduce modesi, 0, (top1, mode) ->
 				Math.max(top1, mode.n)
 			Math.max(top0, top)
-		@tau_increment = 1 / (@c * @top_mode * @tau_steps_per_fastest_revolution)
-
-	x_i: (i, tau, sigma) ->
-		vtau = Math.PI * tau * @c
-		vsigma = Math.PI * sigma
-
-		return @x_i_factor * reduce @modes[i-2], 0, (sum, mode) ->
-			sum + (
-				mode.a * Math.sin(mode.n * vtau) -
-				mode.b * Math.cos(mode.n * vtau)
-			) * Math.cos(mode.n * vsigma) / mode.n
-
-	y_m: (tau, sigma) ->
-		vtau = Math.PI * tau * @c
-		vsigma = Math.PI * sigma
-
-		return @y_m_factor * reduce @modes, 0, (sum, modesi) ->
-			sum + reduce modesi, 0, (sum1, mode1) ->
-				sum1 + reduce modesi, 0, (sum2, mode2) ->
-					sum2 += (
-						(mode1.b * mode2.a + mode1.a * mode2.b) * Math.cos((mode1.n + mode2.n) * vtau) +
-						(mode1.b * mode2.b - mode1.a * mode2.a) * Math.sin((mode1.n + mode2.n) * vtau)
-					) * Math.cos((mode1.n + mode2.n) * vsigma) / (mode1.n + mode2.n)
-					sum2 += (
-						(mode1.b * mode2.a - mode1.a * mode2.b) * Math.cos((mode1.n - mode2.n) * vtau) -
-						(mode1.b * mode2.b + mode1.a * mode2.a) * Math.sin((mode1.n - mode2.n) * vtau)
-					) * Math.cos((mode1.n - mode2.n) * vsigma) / (mode1.n - mode2.n) if mode1.n != mode2.n
-					sum2
 
 	coordinates: (tau, sigma) ->
 		y_m = @y_m(tau, sigma)
@@ -122,6 +86,99 @@ class OpenString
 			(1 - w) * coords_low[2] + w * coords_high[2]
 			(1 - w) * coords_low[3] + w * coords_high[3]
 		]
+
+
+class OpenString extends String
+	calculate_velocity: ->
+		inverse_c_squared = 2 * @regge_slope * Math.PI * Math.PI * reduce @modes, 0, (sum, modesi) ->
+			sum + reduce modesi, 0, (sum1, mode) ->
+				sum1 + mode.a * mode.a + mode.b * mode.b
+		@c = 1 / Math.sqrt(inverse_c_squared)
+
+		@x_i_factor = 2 * Math.sqrt(2 * @regge_slope)
+		@y_m_factor = - Math.PI * @c * 2 * @regge_slope
+
+	calculate_simulation_properties: ->
+		# Fastest contribution comes from the top mode interfering with itself
+		@tau_increment = 1 / (@c * @top_mode * @tau_steps_per_fastest_revolution)
+
+	x_i: (i, tau, sigma) ->
+		vtau = Math.PI * tau * @c
+		vsigma = Math.PI * sigma
+
+		return @x_i_factor * reduce @modes[i-2], 0, (sum, mode) ->
+			sum + (
+				mode.a * Math.sin(mode.n * vtau) -
+				mode.b * Math.cos(mode.n * vtau)
+			) * Math.cos(mode.n * vsigma) / mode.n
+
+	y_m: (tau, sigma) ->
+		vtau = Math.PI * tau * @c
+		vsigma = Math.PI * sigma
+
+		return @y_m_factor * reduce @modes, 0, (sum, modesi) ->
+			sum + reduce modesi, 0, (sum1, mode1) ->
+				sum1 + reduce modesi, 0, (sum2, mode2) ->
+					sum2 += (
+						(mode1.b * mode2.a + mode1.a * mode2.b) * Math.cos((mode1.n + mode2.n) * vtau) +
+						(mode1.b * mode2.b - mode1.a * mode2.a) * Math.sin((mode1.n + mode2.n) * vtau)
+					) * Math.cos((mode1.n + mode2.n) * vsigma) / (mode1.n + mode2.n)
+					sum2 += (
+						(mode1.b * mode2.a - mode1.a * mode2.b) * Math.cos((mode1.n - mode2.n) * vtau) -
+						(mode1.b * mode2.b + mode1.a * mode2.a) * Math.sin((mode1.n - mode2.n) * vtau)
+					) * Math.cos((mode1.n - mode2.n) * vsigma) / (mode1.n - mode2.n) if mode1.n != mode2.n
+					sum2
+
+# For the closed string the squared amplitude of the left and right modes must be equal
+class ClosedString extends String
+	calculate_velocity: ->
+		inverse_c_squared = 4 * @regge_slope * Math.PI * Math.PI * reduce @modes, 0, (sum, modesi) ->
+			sum + reduce modesi, 0, (sum1, mode) ->
+				sum1 + mode.a1 * mode.a1 + mode.b1 * mode.b1 + mode.a2 * mode.a2 + mode.b2 * mode.b2
+		@c = 1 / Math.sqrt(inverse_c_squared)
+
+		@x_i_factor = Math.sqrt(2 * @regge_slope)
+		@y_m_factor = - Math.PI * @c * 2 * @regge_slope
+
+	calculate_simulation_properties: ->
+		@tau_increment = 1 / (2 * @c * @top_mode * @tau_steps_per_fastest_revolution)
+
+	x_i: (i, tau, sigma) ->
+		vplus = 2 * Math.PI * (@c * tau + sigma)
+		vminus = 2 * Math.PI * (@c * tau - sigma)
+
+		return @x_i_factor * reduce @modes[i-2], 0, (sum, mode) ->
+			sum + (
+				mode.a1 * Math.sin(mode.n * vplus) -
+				mode.b1 * Math.cos(mode.n * vplus) +
+				mode.a2 * Math.sin(mode.n * vminus) -
+				mode.b2 * Math.cos(mode.n * vminus)
+			) / mode.n
+
+	y_m: (tau, sigma) ->
+		vplus = 2 * Math.PI * (@c * tau + sigma)
+		vminus = 2 * Math.PI * (@c * tau - sigma)
+
+		return @y_m_factor * reduce @modes, 0, (sum, modesi) ->
+			sum + reduce modesi, 0, (sum1, mode1) ->
+				sum1 + reduce modesi, 0, (sum2, mode2) ->
+					sum2 += (
+						(mode1.b1 * mode2.a1 + mode1.a1 * mode2.b1) * Math.cos((mode1.n + mode2.n) * vplus) +
+						(mode1.b1 * mode2.b1 - mode1.a1 * mode2.a1) * Math.sin((mode1.n + mode2.n) * vplus)
+					) / (mode1.n + mode2.n)
+					sum2 += (
+						(mode1.b1 * mode2.a1 - mode1.a1 * mode2.b1) * Math.cos((mode1.n - mode2.n) * vplus) -
+						(mode1.b1 * mode2.b1 + mode1.a1 * mode2.a1) * Math.sin((mode1.n - mode2.n) * vplus)
+					) / (mode1.n - mode2.n) if mode1.n != mode2.n
+					sum2 += (
+						(mode1.b2 * mode2.a2 + mode1.a2 * mode2.b2) * Math.cos((mode1.n + mode2.n) * vminus) +
+						(mode1.b2 * mode2.b2 - mode1.a2 * mode2.a2) * Math.sin((mode1.n + mode2.n) * vminus)
+					) / (mode1.n + mode2.n)
+					sum2 += (
+						(mode1.b2 * mode2.a2 - mode1.a2 * mode2.b2) * Math.cos((mode1.n - mode2.n) * vminus) -
+						(mode1.b2 * mode2.b2 + mode1.a2 * mode2.a2) * Math.sin((mode1.n - mode2.n) * vminus)
+					) / (mode1.n - mode2.n) if mode1.n != mode2.n
+					sum2
 
 
 class StringAnimation
