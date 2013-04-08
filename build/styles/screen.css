@@ -78,6 +78,11 @@ textarea.string-modes {
   border-style: none;
 }
 
+body {
+  font-family: Marcellus, sans-serif;
+  counter-reset: chapter;
+}
+
 header {
   margin-top: 4em;
   margin-bottom: 4em;
@@ -85,6 +90,20 @@ header {
 }
 header p {
   margin: 0;
+}
+
+h2.numbered:before {
+  content: counter(chapter) ". ";
+  counter-increment: chapter;
+}
+
+h2.numbered {
+  counter-reset: section;
+}
+
+h3.numbered:before {
+  content: counter(chapter) "." counter(section) " ";
+  counter-increment: section;
 }
 
 h1 {
@@ -98,8 +117,4 @@ h2 {
   margin-top: 1em;
   font-weight: normal;
   font-size: 1.5em;
-}
-
-body {
-  font-family: Marcellus, sans-serif;
 }
