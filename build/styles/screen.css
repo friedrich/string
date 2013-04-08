@@ -20,21 +20,31 @@
 }
 
 .string {
-  width: 100%;
+  width: 74.57627%;
   float: left;
   margin-right: 1.69492%;
   display: inline;
-  border-style: dashed;
-  border-width: 0.3em;
-  border-color: black;
+  border: 0.3em dashed black;
 }
 .string canvas {
   display: block;
   width: 100%;
-  height: 40em;
+  height: 35em;
+}
+
+.string-controls {
+  width: 23.72881%;
+  float: right;
+  margin-right: 0;
+  *margin-left: -1em;
+  display: inline;
+  border: 0.3em dashed black;
+  margin: 0;
+  padding: 0;
 }
 
 textarea.string-modes {
-  width: 40em;
+  width: 100%;
   height: 10em;
+  border-style: none;
 }

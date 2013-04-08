@@ -7,21 +7,29 @@ $column-width: 4em
 $gutter-width: 1em
 $grid-padding: $gutter-width
 
+@mixin framed
+  border: 0.3em dashed black
+
 .container
   +container
   // +susy-grid-background
 
 .string
-  +span-columns(12, 12)
-  border-style: dashed
-  border-width: 0.3em
-  border-color: black
+  +span-columns(9, 12)
+  +framed
 
   canvas
     display: block
     width: 100%
-    height: 40em
+    height: 35em
+
+.string-controls
+  +span-columns(3 omega, 12)
+  +framed
+  margin: 0
+  padding: 0
 
 textarea.string-modes
-  width: 40em
+  width: 100%
   height: 10em
+  border-style: none
