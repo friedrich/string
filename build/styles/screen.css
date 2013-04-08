@@ -1,0 +1,69 @@
+/* line 11, ../../source/styles/screen.sass */
+.container {
+  *zoom: 1;
+  max-width: 59em;
+  _width: 59em;
+  padding-left: 1em;
+  padding-right: 1em;
+  margin-left: auto;
+  margin-right: auto;
+}
+/* line 38, ../../../../.rbenv/versions/2.0.0-p0/lib/ruby/gems/2.0.0/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/utilities/general/_clearfix.scss */
+.container:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+/* line 15, ../../source/styles/screen.sass */
+.string {
+  width: 100%;
+  float: left;
+  margin-right: 1.69492%;
+  display: inline;
+}
+/* line 17, ../../source/styles/screen.sass */
+.string canvas {
+  display: block;
+  margin: 0 auto;
+  border-style: dashed;
+  border-width: 0.3em;
+  border-color: black;
+  width: 1000px;
+  height: 500px;
+}
+
+/* line 2, ../../../../.rbenv/versions/2.0.0-p0/lib/ruby/gems/2.0.0/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/utilities/tables/_scaffolding.scss */
+.string_controls table th {
+  text-align: center;
+  font-weight: bold;
+}
+/* line 6, ../../../../.rbenv/versions/2.0.0-p0/lib/ruby/gems/2.0.0/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/utilities/tables/_scaffolding.scss */
+.string_controls table td,
+.string_controls table th {
+  padding: 2px;
+}
+/* line 8, ../../../../.rbenv/versions/2.0.0-p0/lib/ruby/gems/2.0.0/gems/compass-0.12.2/frameworks/compass/stylesheets/compass/utilities/tables/_scaffolding.scss */
+.string_controls table td.numeric,
+.string_controls table th.numeric {
+  text-align: right;
+}
+
+/* line 30, ../../source/styles/screen.sass */
+body {
+  font-family: "EB Garamond", serif;
+}
+
+/* line 33, ../../source/styles/screen.sass */
+h1 {
+  font-weight: normal;
+  text-align: center;
+  font-size: 10em;
+  padding: 0;
+  margin: 0.5em 0 0 0;
+}
+
+/* line 40, ../../source/styles/screen.sass */
+p, ul {
+  font-size: 2em;
+}
