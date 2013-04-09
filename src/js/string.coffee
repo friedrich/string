@@ -186,9 +186,10 @@ class StringAnimation
 	string_segments: 64
 
 	constructor: (@containers) ->
+		return unless @init_display()
 		@init_controls()
+		@setup_rotation_control()
 		@init_animation()
-		@init_drawing()
 		@main_loop()
 
 	find_in_containers: (selector) ->
@@ -243,10 +244,17 @@ class StringAnimation
 				@open_string = !@open_string
 				@update_string()
 
-	init_drawing: ->
+	show_not_supported: ->
+		@display_container.innerHTML = "<p>Not possible with your browser :-(</p>"
+
+	init_display: ->
 		@display_container = @find_in_containers(".string-display")[0]
 		@viewport_width = @display_container.clientWidth
 		@viewport_height = @display_container.clientHeight
+
+		unless Array.prototype.reduce
+			@show_not_supported()
+			return false
 
 		renderer_parameters =
 			alpha: false
@@ -261,8 +269,8 @@ class StringAnimation
 			catch e
 
 		unless @renderer
-			console.log("No 3d support")
-			return
+			@show_not_supported()
+			return false
 
 		@renderer.autoClear = false
 		@renderer.setClearColorHex(0xffffff, 1)
@@ -309,7 +317,8 @@ class StringAnimation
 		@horizontal_rotation = 0
 
 		@update_camera()
-		@setup_rotation_control()
+
+		return true
 
 	setup_rotation_control: ->
 		prev_mouse_position = {}

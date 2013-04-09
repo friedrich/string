@@ -922,9 +922,12 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
 
     function StringAnimation(containers) {
       this.containers = containers;
+      if (!this.init_display()) {
+        return;
+      }
       this.init_controls();
+      this.setup_rotation_control();
       this.init_animation();
-      this.init_drawing();
       this.main_loop();
     }
 
@@ -997,12 +1000,20 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
       }
     };
 
-    StringAnimation.prototype.init_drawing = function() {
+    StringAnimation.prototype.show_not_supported = function() {
+      return this.display_container.innerHTML = "<p>Not possible with your browser :-(</p>";
+    };
+
+    StringAnimation.prototype.init_display = function() {
       var e, material_parameters, renderer_parameters;
 
       this.display_container = this.find_in_containers(".string-display")[0];
       this.viewport_width = this.display_container.clientWidth;
       this.viewport_height = this.display_container.clientHeight;
+      if (!Array.prototype.reduce) {
+        this.show_not_supported();
+        return false;
+      }
       renderer_parameters = {
         alpha: false,
         stencil: false
@@ -1018,8 +1029,8 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
         }
       }
       if (!this.renderer) {
-        console.log("No 3d support");
-        return;
+        this.show_not_supported();
+        return false;
       }
       this.renderer.autoClear = false;
       this.renderer.setClearColorHex(0xffffff, 1);
@@ -1056,7 +1067,7 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
       this.vertical_rotation = 0;
       this.horizontal_rotation = 0;
       this.update_camera();
-      return this.setup_rotation_control();
+      return true;
     };
 
     StringAnimation.prototype.setup_rotation_control = function() {
