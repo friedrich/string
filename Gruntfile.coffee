@@ -46,7 +46,6 @@ module.exports = (grunt) ->
 			js:
 				files:
 					"build/js/index.js": [
-						"src/js/vendor/rAF.js",
 						"src/js/vendor/three.js",
 						"build/js/string.js"
 					]
