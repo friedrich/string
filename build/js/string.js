@@ -305,11 +305,10 @@
     StringAnimation.prototype.init_drawing = function() {
       var e, material_parameters, renderer_parameters;
 
-      this.canvas = this.find_in_containers("canvas.string-display")[0];
-      this.viewport_width = this.canvas.scrollWidth;
-      this.viewport_height = this.canvas.scrollHeight;
+      this.display_container = this.find_in_containers(".string-display")[0];
+      this.viewport_width = this.display_container.clientWidth;
+      this.viewport_height = this.display_container.clientHeight;
       renderer_parameters = {
-        canvas: this.canvas,
         alpha: false,
         stencil: false
       };
@@ -330,6 +329,7 @@
       this.renderer.autoClear = false;
       this.renderer.setClearColorHex(0xffffff, 1);
       this.renderer.setSize(this.viewport_width, this.viewport_height);
+      this.display_container.appendChild(this.renderer.domElement);
       this.scene = new THREE.Scene();
       this.overlay_scene = new THREE.Scene();
       material_parameters = {
@@ -387,18 +387,18 @@
         _this.horizontal_rotation = Math.min(_this.horizontal_rotation, Math.PI / 2);
         return _this.update_camera();
       };
-      this.canvas.addEventListener("mousedown", function(event) {
+      this.display_container.addEventListener("mousedown", function(event) {
         prev_mouse_position = {
           x: event.x,
           y: event.y
         };
-        return _this.canvas.addEventListener("mousemove", mouse_move_listener);
+        return _this.display_container.addEventListener("mousemove", mouse_move_listener);
       });
-      this.canvas.addEventListener("mouseup", function() {
-        return _this.canvas.removeEventListener("mousemove", mouse_move_listener);
+      this.display_container.addEventListener("mouseup", function() {
+        return _this.display_container.removeEventListener("mousemove", mouse_move_listener);
       });
-      return this.canvas.addEventListener("mouseout", function() {
-        return _this.canvas.removeEventListener("mousemove", mouse_move_listener);
+      return this.display_container.addEventListener("mouseout", function() {
+        return _this.display_container.removeEventListener("mousemove", mouse_move_listener);
       });
     };
 

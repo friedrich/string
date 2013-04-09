@@ -244,12 +244,11 @@ class StringAnimation
 				@update_string()
 
 	init_drawing: ->
-		@canvas = @find_in_containers("canvas.string-display")[0]
-		@viewport_width = @canvas.scrollWidth
-		@viewport_height = @canvas.scrollHeight
+		@display_container = @find_in_containers(".string-display")[0]
+		@viewport_width = @display_container.clientWidth
+		@viewport_height = @display_container.clientHeight
 
 		renderer_parameters =
-			canvas: @canvas
 			alpha: false
 			stencil: false
 
@@ -268,6 +267,7 @@ class StringAnimation
 		@renderer.autoClear = false
 		@renderer.setClearColorHex(0xffffff, 1)
 		@renderer.setSize(@viewport_width, @viewport_height)
+		@display_container.appendChild(@renderer.domElement);
 
 		@scene = new THREE.Scene()
 		@overlay_scene = new THREE.Scene()
@@ -328,14 +328,14 @@ class StringAnimation
 
 			@update_camera()
 
-		@canvas.addEventListener "mousedown", (event) =>
+		@display_container.addEventListener "mousedown", (event) =>
 			prev_mouse_position = { x: event.x, y: event.y }
-			@canvas.addEventListener "mousemove", mouse_move_listener
+			@display_container.addEventListener "mousemove", mouse_move_listener
 
-		@canvas.addEventListener "mouseup", =>
-			@canvas.removeEventListener "mousemove", mouse_move_listener
-		@canvas.addEventListener "mouseout", =>
-			@canvas.removeEventListener "mousemove", mouse_move_listener
+		@display_container.addEventListener "mouseup", =>
+			@display_container.removeEventListener "mousemove", mouse_move_listener
+		@display_container.addEventListener "mouseout", =>
+			@display_container.removeEventListener "mousemove", mouse_move_listener
 
 	update_camera: ->
 		rotation = new THREE.Quaternion()
