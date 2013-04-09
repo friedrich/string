@@ -203,18 +203,30 @@ class StringAnimation
 		@update_string()
 
 	update_string: ->
-		modes = JSON.parse(@mode_control_textarea.value)
+		settings = JSON.parse(@mode_control_textarea.value)
+		@open_string = settings.open
 		@string =
 			if @open_string
-				new OpenString(modes)
+				new OpenString(settings.modes)
 			else
-				new ClosedString(modes)
+				new ClosedString(settings.modes)
+
+	update_site_uri: ->
+		history.replaceState(null, "", "#" + encodeURIComponent(@mode_control_textarea.value))
 
 	init_controls: ->
 		@mode_control_textarea = @find_in_containers("textarea.string-modes")[0]
 		if @mode_control_textarea
+			if window.location.hash
+				settings = window.location.hash.replace(/^#/, "")
+				settings = decodeURIComponent(settings)
+			else
+				settings = '{"open": true,\n"modes": [[\n{ "n": 1, "a": 0.5, "b": 0 },\n{ "n": 2, "a": 0.5, "b": 0 }\n],[\n]]}'
+			@mode_control_textarea.value = settings
+
 			@mode_control_textarea.addEventListener "blur", =>
 				@update_string()
+				@update_site_uri()
 
 		@type_control_button = @find_in_containers("button.string-type")[0]
 		if @type_control_button

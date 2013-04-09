@@ -953,19 +953,33 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
     };
 
     StringAnimation.prototype.update_string = function() {
-      var modes;
+      var settings;
 
-      modes = JSON.parse(this.mode_control_textarea.value);
-      return this.string = this.open_string ? new OpenString(modes) : new ClosedString(modes);
+      settings = JSON.parse(this.mode_control_textarea.value);
+      this.open_string = settings.open;
+      return this.string = this.open_string ? new OpenString(settings.modes) : new ClosedString(settings.modes);
+    };
+
+    StringAnimation.prototype.update_site_uri = function() {
+      return history.replaceState(null, "", "#" + encodeURIComponent(this.mode_control_textarea.value));
     };
 
     StringAnimation.prototype.init_controls = function() {
-      var _this = this;
+      var settings,
+        _this = this;
 
       this.mode_control_textarea = this.find_in_containers("textarea.string-modes")[0];
       if (this.mode_control_textarea) {
+        if (window.location.hash) {
+          settings = window.location.hash.replace(/^#/, "");
+          settings = decodeURIComponent(settings);
+        } else {
+          settings = '{"open": true,\n"modes": [[\n{ "n": 1, "a": 0.5, "b": 0 },\n{ "n": 2, "a": 0.5, "b": 0 }\n],[\n]]}';
+        }
+        this.mode_control_textarea.value = settings;
         this.mode_control_textarea.addEventListener("blur", function() {
-          return _this.update_string();
+          _this.update_string();
+          return _this.update_site_uri();
         });
       }
       this.type_control_button = this.find_in_containers("button.string-type")[0];
