@@ -4,20 +4,14 @@
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-  window.addEventListener("load", function() {
-    var string_container, string_containers, string_name, _i, _len, _ref, _results;
+  $(window).on("load", function() {
+    var string_container, _i, _len, _ref, _results;
 
-    string_containers = {};
-    _ref = document.querySelectorAll("[data-string]");
+    _ref = $("[data-string]");
+    _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       string_container = _ref[_i];
-      string_name = string_container.getAttribute("data-string");
-      string_containers[string_name] || (string_containers[string_name] = []);
-      string_containers[string_name].push(string_container);
-    }
-    _results = [];
-    for (string_name in string_containers) {
-      _results.push(new StringAnimation(string_containers[string_name]));
+      _results.push(new StringAnimation(string_container));
     }
     return _results;
   });
@@ -225,8 +219,8 @@
   StringAnimation = (function() {
     StringAnimation.prototype.string_segments = 64;
 
-    function StringAnimation(containers) {
-      this.containers = containers;
+    function StringAnimation(container) {
+      this.container = container;
       if (!this.init_display()) {
         return;
       }
@@ -235,19 +229,6 @@
       this.init_animation();
       this.main_loop();
     }
-
-    StringAnimation.prototype.find_in_containers = function(selector) {
-      return reduce(this.containers, [], function(list, container) {
-        var element, _i, _len, _ref2;
-
-        _ref2 = container.querySelectorAll(selector);
-        for (_i = 0, _len = _ref2.length; _i < _len; _i++) {
-          element = _ref2[_i];
-          list.push(element);
-        }
-        return list;
-      });
-    };
 
     StringAnimation.prototype.init_animation = function() {
       this.clock = new THREE.Clock();
@@ -282,7 +263,7 @@
       var settings,
         _this = this;
 
-      this.mode_control_textarea = this.find_in_containers("textarea.string-modes")[0];
+      this.mode_control_textarea = $(this.container).find("[data-string-modes]")[0];
       if (this.mode_control_textarea) {
         if (window.location.hash) {
           settings = window.location.hash.replace(/^#/, "");
@@ -291,14 +272,14 @@
           settings = '{"open": true,\n"modes": [[\n{ "n": 1, "a": 0.5, "b": 0 },\n{ "n": 2, "a": 0.5, "b": 0 }\n],[\n]]}';
         }
         this.mode_control_textarea.value = settings;
-        this.mode_control_textarea.addEventListener("blur", function() {
+        $(this.mode_control_textarea).on("blur", function() {
           _this.update_string();
           return _this.update_site_uri();
         });
       }
-      this.type_control_button = this.find_in_containers("button.string-type")[0];
+      this.type_control_button = $(this.container).find("button[data-string-type]")[0];
       if (this.type_control_button) {
-        return this.type_control_button.addEventListener("click", function() {
+        return $(this.type_control_button).on("click", function() {
           _this.open_string = !_this.open_string;
           return _this.update_string();
         });
@@ -312,7 +293,7 @@
     StringAnimation.prototype.init_display = function() {
       var e, material_parameters, renderer_parameters;
 
-      this.display_container = this.find_in_containers(".string-display")[0];
+      this.display_container = $(this.container).find("[data-string-display]")[0];
       this.viewport_width = this.display_container.clientWidth;
       this.viewport_height = this.display_container.clientHeight;
       if (!Array.prototype.reduce) {
@@ -380,12 +361,12 @@
         _this = this;
 
       prev_mouse_position = {};
-      mouse_move_listener = function(event) {
+      mouse_move_listener = function(e) {
         var mouse_difference, mouse_position;
 
         mouse_position = {
-          x: event.x,
-          y: event.y
+          x: e.clientX,
+          y: e.clientY
         };
         mouse_difference = {
           x: mouse_position.x - prev_mouse_position.x,
@@ -398,18 +379,18 @@
         _this.horizontal_rotation = Math.min(_this.horizontal_rotation, Math.PI / 2);
         return _this.update_camera();
       };
-      this.display_container.addEventListener("mousedown", function(event) {
+      $(this.display_container).on("mousedown", function(e) {
         prev_mouse_position = {
-          x: event.x,
-          y: event.y
+          x: e.clientX,
+          y: e.clientY
         };
-        return _this.display_container.addEventListener("mousemove", mouse_move_listener);
+        return $(_this.display_container).on("mousemove", mouse_move_listener);
       });
-      this.display_container.addEventListener("mouseup", function() {
-        return _this.display_container.removeEventListener("mousemove", mouse_move_listener);
+      $(this.display_container).on("mouseup", function() {
+        return $(_this.display_container).off("mousemove", mouse_move_listener);
       });
-      return this.display_container.addEventListener("mouseout", function() {
-        return _this.display_container.removeEventListener("mousemove", mouse_move_listener);
+      return $(this.display_container).on("mouseout", function() {
+        return $(_this.display_container).off("mousemove", mouse_move_listener);
       });
     };
 

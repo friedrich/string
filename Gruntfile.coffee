@@ -46,8 +46,9 @@ module.exports = (grunt) ->
 			js:
 				files:
 					"build/js/index.js": [
+						"src/js/vendor/jquery.js"
+						"build/js/string.js",
 						"src/js/vendor/three.js",
-						"build/js/string.js"
 					]
 
 		symlink:

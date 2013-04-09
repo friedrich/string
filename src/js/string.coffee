@@ -1,7 +1,7 @@
 "use strict"
 
-window.addEventListener "load", ->
-	for string_container in document.querySelectorAll("[data-string]")
+$(window).on "load", ->
+	for string_container in $("[data-string]")
 		new StringAnimation(string_container)
 
 reduce = (array, a, b) ->
@@ -213,7 +213,7 @@ class StringAnimation
 			history.replaceState(null, "", "#" + encodeURIComponent(@mode_control_textarea.value))
 
 	init_controls: ->
-		@mode_control_textarea = @container.querySelector("[data-string-modes]")
+		@mode_control_textarea = $(@container).find("[data-string-modes]")[0]
 		if @mode_control_textarea
 			if window.location.hash
 				settings = window.location.hash.replace(/^#/, "")
@@ -222,13 +222,13 @@ class StringAnimation
 				settings = '{"open": true,\n"modes": [[\n{ "n": 1, "a": 0.5, "b": 0 },\n{ "n": 2, "a": 0.5, "b": 0 }\n],[\n]]}'
 			@mode_control_textarea.value = settings
 
-			@mode_control_textarea.addEventListener "blur", =>
+			$(@mode_control_textarea).on "blur", =>
 				@update_string()
 				@update_site_uri()
 
-		@type_control_button = @container.querySelector("button[data-string-type]")
+		@type_control_button = $(@container).find("button[data-string-type]")[0]
 		if @type_control_button
-			@type_control_button.addEventListener "click", =>
+			$(@type_control_button).on "click", =>
 				@open_string = !@open_string
 				@update_string()
 
@@ -236,7 +236,7 @@ class StringAnimation
 		@display_container.innerHTML = "<p>Not possible with your browser :-(</p>"
 
 	init_display: ->
-		@display_container = @container.querySelector("[data-string-display]")
+		@display_container = $(@container).find("[data-string-display]")[0]
 		@viewport_width = @display_container.clientWidth
 		@viewport_height = @display_container.clientHeight
 
@@ -311,8 +311,8 @@ class StringAnimation
 	setup_rotation_control: ->
 		prev_mouse_position = {}
 
-		mouse_move_listener = (event) =>
-			mouse_position = { x: event.x, y: event.y }
+		mouse_move_listener = (e) =>
+			mouse_position = { x: e.clientX, y: e.clientY }
 			mouse_difference =
 				x: mouse_position.x - prev_mouse_position.x
 				y: mouse_position.y - prev_mouse_position.y
@@ -325,14 +325,14 @@ class StringAnimation
 
 			@update_camera()
 
-		@display_container.addEventListener "mousedown", (event) =>
-			prev_mouse_position = { x: event.x, y: event.y }
-			@display_container.addEventListener "mousemove", mouse_move_listener
+		$(@display_container).on "mousedown", (e) =>
+			prev_mouse_position = { x: e.clientX, y: e.clientY }
+			$(@display_container).on "mousemove", mouse_move_listener
 
-		@display_container.addEventListener "mouseup", =>
-			@display_container.removeEventListener "mousemove", mouse_move_listener
-		@display_container.addEventListener "mouseout", =>
-			@display_container.removeEventListener "mousemove", mouse_move_listener
+		$(@display_container).on "mouseup", =>
+			$(@display_container).off "mousemove", mouse_move_listener
+		$(@display_container).on "mouseout", =>
+			$(@display_container).off "mousemove", mouse_move_listener
 
 	update_camera: ->
 		rotation = new THREE.Quaternion()

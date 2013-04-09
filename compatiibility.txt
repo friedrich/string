@@ -9,6 +9,7 @@ Fast:
 Mandatory:
  * Canvas: IE 9
  * map, reduce: IE 9, Opera 10.5, Safari 4
+ * addEventListener: IE 9, Opera 7
  * All: IE 9, Firefox, Chrome, Safari, Opera 10.5
 
 IE 9
