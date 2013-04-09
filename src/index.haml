@@ -11,13 +11,12 @@
           The Interactive String
         %p Friedrich Schöller
       .string(data-string="main")
-        .string-display
+        .display(data-string-display=true)
           %noscript
             %p Javascript is required.
-        .controls
-
+        .controls(data-string-controls=true)
           / %button.string-type open / closed
-          %textarea.string-modes
+          %textarea(data-string-modes=true)
       .description
         %h2.numbered Calculations
         %p

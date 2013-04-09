@@ -1,14 +1,8 @@
 "use strict"
 
 window.addEventListener "load", ->
-	string_containers = {}
 	for string_container in document.querySelectorAll("[data-string]")
-		string_name = string_container.getAttribute("data-string")
-		string_containers[string_name] ||= []
-		string_containers[string_name].push(string_container)
-
-	for string_name of string_containers
-		new StringAnimation(string_containers[string_name])
+		new StringAnimation(string_container)
 
 reduce = (array, a, b) ->
 	array.reduce(b, a)
@@ -185,18 +179,12 @@ class ClosedString extends String
 class StringAnimation
 	string_segments: 64
 
-	constructor: (@containers) ->
+	constructor: (@container) ->
 		return unless @init_display()
 		@init_controls()
 		@setup_rotation_control()
 		@init_animation()
 		@main_loop()
-
-	find_in_containers: (selector) ->
-		reduce @containers, [], (list, container) ->
-			for element in container.querySelectorAll(selector)
-				list.push(element)
-			list
 
 	init_animation: ->
 		@clock = new THREE.Clock()
@@ -225,7 +213,7 @@ class StringAnimation
 			history.replaceState(null, "", "#" + encodeURIComponent(@mode_control_textarea.value))
 
 	init_controls: ->
-		@mode_control_textarea = @find_in_containers("textarea.string-modes")[0]
+		@mode_control_textarea = @container.querySelector("[data-string-modes]")
 		if @mode_control_textarea
 			if window.location.hash
 				settings = window.location.hash.replace(/^#/, "")
@@ -238,7 +226,7 @@ class StringAnimation
 				@update_string()
 				@update_site_uri()
 
-		@type_control_button = @find_in_containers("button.string-type")[0]
+		@type_control_button = @container.querySelector("button[data-string-type]")
 		if @type_control_button
 			@type_control_button.addEventListener "click", =>
 				@open_string = !@open_string
@@ -248,7 +236,7 @@ class StringAnimation
 		@display_container.innerHTML = "<p>Not possible with your browser :-(</p>"
 
 	init_display: ->
-		@display_container = @find_in_containers(".string-display")[0]
+		@display_container = @container.querySelector("[data-string-display]")
 		@viewport_width = @display_container.clientWidth
 		@viewport_height = @display_container.clientHeight
 
