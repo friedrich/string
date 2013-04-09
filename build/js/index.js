@@ -733,7 +733,7 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
   String = (function() {
     String.prototype.regge_slope = 1 / 2;
 
-    String.prototype.tau_steps_per_fastest_revolution = 32;
+    String.prototype.tau_steps_per_fastest_revolution = 48;
 
     function String(modes) {
       this.modes = modes;
@@ -923,7 +923,7 @@ fragmentShader:"uniform vec3 color;\nuniform sampler2D map;\nuniform float opaci
   })(String);
 
   StringAnimation = (function() {
-    StringAnimation.prototype.string_segments = 48;
+    StringAnimation.prototype.string_segments = 64;
 
     function StringAnimation(containers) {
       this.containers = containers;

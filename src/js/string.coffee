@@ -23,7 +23,7 @@ setTimeout2 = (a, b) ->
 # * Value of c follows.
 class String
 	regge_slope: 1 / 2
-	tau_steps_per_fastest_revolution: 32
+	tau_steps_per_fastest_revolution: 48
 
 	constructor: (@modes) ->
 		@stored_coordinates = {}
@@ -183,7 +183,7 @@ class ClosedString extends String
 
 
 class StringAnimation
-	string_segments: 48
+	string_segments: 64
 
 	constructor: (@containers) ->
 		@open_string = true
