@@ -1,0 +1,18 @@
+Opional:
+ * woff: IE 9, Safari 5.1, Opera 11.1
+ * Session history management: IE 10, Safari 5 buggy, Opera 11.5
+ * All: IE 9, Firefox, Chrome, Safari 5.1, Opera 11.5
+
+Fast:
+ * WebGL: not IE, Firefox maybe, Chrome maybe, Chrome 18, Safari 5.1 maybe, Opera 12 maybe
+
+Mandatory:
+ * Canvas: IE 9
+ * map, reduce: IE 9, Opera 10.5, Safari 4
+ * All: IE 9, Firefox, Chrome, Safari, Opera 10.5
+
+IE 9
+Firefox
+Chrome
+Safari 5.1
+Opera 11.5

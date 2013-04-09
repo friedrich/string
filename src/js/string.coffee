@@ -220,7 +220,8 @@ class StringAnimation
 				new ClosedString(settings.modes)
 
 	update_site_uri: ->
-		history.replaceState(null, "", "#" + encodeURIComponent(@mode_control_textarea.value))
+		if window.history && history.replaceState
+			history.replaceState(null, "", "#" + encodeURIComponent(@mode_control_textarea.value))
 
 	init_controls: ->
 		@mode_control_textarea = @find_in_containers("textarea.string-modes")[0]

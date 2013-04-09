@@ -270,7 +270,9 @@
     };
 
     StringAnimation.prototype.update_site_uri = function() {
-      return history.replaceState(null, "", "#" + encodeURIComponent(this.mode_control_textarea.value));
+      if (window.history && history.replaceState) {
+        return history.replaceState(null, "", "#" + encodeURIComponent(this.mode_control_textarea.value));
+      }
     };
 
     StringAnimation.prototype.init_controls = function() {
