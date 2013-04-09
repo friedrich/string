@@ -56,11 +56,10 @@
   display: inline;
   height: 100%;
   border: 1px solid black;
-  text-align: center;
-  font-size: 1.5em;
 }
 .string .display p {
-  margin: 1em;
+  text-align: center;
+  margin: 2em;
 }
 .string .controls {
   width: 23.72881%;
