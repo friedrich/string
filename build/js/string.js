@@ -257,6 +257,15 @@
 
       settings = JSON.parse(this.mode_control_textarea.value);
       this.open_string = settings.open;
+      settings.modes = settings.modes.map(function(modesi) {
+        return modesi.modes = modesi.filter(function(mode) {
+          if (settings.open) {
+            return mode.a !== 0 || mode.b !== 0;
+          } else {
+            return mode.a1 !== 0 || mode.a2 !== 0 || mode.b1 !== 0 || mode.b2 !== 0;
+          }
+        });
+      });
       return this.string = this.open_string ? new OpenString(settings.modes) : new ClosedString(settings.modes);
     };
 

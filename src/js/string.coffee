@@ -205,6 +205,14 @@ class StringAnimation
 	update_string: ->
 		settings = JSON.parse(@mode_control_textarea.value)
 		@open_string = settings.open
+
+		settings.modes = settings.modes.map (modesi) ->
+			modesi.modes = modesi.filter (mode) ->
+				if settings.open
+					mode.a != 0 || mode.b != 0
+				else
+					mode.a1 != 0 || mode.a2 != 0 || mode.b1 != 0 || mode.b2 != 0
+
 		@string =
 			if @open_string
 				new OpenString(settings.modes)
