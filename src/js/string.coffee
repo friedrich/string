@@ -186,7 +186,6 @@ class StringAnimation
 	string_segments: 64
 
 	constructor: (@containers) ->
-		@open_string = true
 		@init_controls()
 		@init_animation()
 		@init_drawing()
@@ -200,6 +199,7 @@ class StringAnimation
 
 	init_animation: ->
 		@clock = new THREE.Clock()
+		@animation_time = 0
 		@update_string()
 
 	update_string: ->
@@ -348,7 +348,8 @@ class StringAnimation
 		window.requestAnimationFrame =>
 			@main_loop()
 
-		@animate_frame(@clock.getDelta())
+		# Draw at least 20 frames per animated seconds 
+		@animate_frame(Math.min(@clock.getDelta(), 0.05))
 		@update_scene()
 
 		@renderer.clear(true, true, false)
@@ -360,7 +361,8 @@ class StringAnimation
 		@string_geometry.verticesNeedUpdate = true
 
 	animate_frame: (dt) ->
-		@string_vertices = (@string_coordinates(@clock.elapsedTime, i / @string_segments) for i in [0..@string_segments])
+		@animation_time += dt
+		@string_vertices = (@string_coordinates(@animation_time, i / @string_segments) for i in [0..@string_segments])
 
 	string_coordinates: (t, sigma) ->
 		coords = @string.coordinates_at_global_time(t, sigma)

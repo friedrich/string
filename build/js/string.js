@@ -227,7 +227,6 @@
 
     function StringAnimation(containers) {
       this.containers = containers;
-      this.open_string = true;
       this.init_controls();
       this.init_animation();
       this.init_drawing();
@@ -249,6 +248,7 @@
 
     StringAnimation.prototype.init_animation = function() {
       this.clock = new THREE.Clock();
+      this.animation_time = 0;
       return this.update_string();
     };
 
@@ -417,7 +417,7 @@
       window.requestAnimationFrame(function() {
         return _this.main_loop();
       });
-      this.animate_frame(this.clock.getDelta());
+      this.animate_frame(Math.min(this.clock.getDelta(), 0.05));
       this.update_scene();
       this.renderer.clear(true, true, false);
       this.renderer.render(this.scene, this.camera);
@@ -432,12 +432,13 @@
     StringAnimation.prototype.animate_frame = function(dt) {
       var i;
 
+      this.animation_time += dt;
       return this.string_vertices = (function() {
         var _i, _ref2, _results;
 
         _results = [];
         for (i = _i = 0, _ref2 = this.string_segments; 0 <= _ref2 ? _i <= _ref2 : _i >= _ref2; i = 0 <= _ref2 ? ++_i : --_i) {
-          _results.push(this.string_coordinates(this.clock.elapsedTime, i / this.string_segments));
+          _results.push(this.string_coordinates(this.animation_time, i / this.string_segments));
         }
         return _results;
       }).call(this);
