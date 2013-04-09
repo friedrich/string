@@ -240,7 +240,8 @@ class StringAnimation
 		@viewport_width = @display_container.clientWidth
 		@viewport_height = @display_container.clientHeight
 
-		unless Array.prototype.reduce
+		# three.js needs addEventListener
+		unless Array.prototype.reduce && window.addEventListener
 			@show_not_supported()
 			return false
 

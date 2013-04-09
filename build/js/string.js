@@ -296,7 +296,7 @@
       this.display_container = $(this.container).find("[data-string-display]")[0];
       this.viewport_width = this.display_container.clientWidth;
       this.viewport_height = this.display_container.clientHeight;
-      if (!Array.prototype.reduce) {
+      if (!(Array.prototype.reduce && window.addEventListener)) {
         this.show_not_supported();
         return false;
       }
