@@ -16,6 +16,7 @@ module.exports = (grunt) ->
 	grunt.loadNpmTasks("grunt-contrib-connect")
 	grunt.loadNpmTasks("grunt-contrib-livereload")
 	grunt.loadNpmTasks("grunt-regarde")
+	grunt.loadNpmTasks("grunt-contrib-copy")
 	# grunt.loadNpmTasks("grunt-contrib-uglify")
 
 	grunt.initConfig
@@ -41,6 +42,12 @@ module.exports = (grunt) ->
 					rename: (base, path) ->
 						path.replace(/^src\//, "build/").replace(/\.haml$/, ".html")
 				})
+
+		copy:
+			all:
+				files: [
+					{ expand: true, cwd: "src", src: ["**/*.html"], dest: "build" }
+				]
 
 		concat:
 			js:
@@ -82,10 +89,14 @@ module.exports = (grunt) ->
 				files: ["src/**/*.haml"]
 				tasks: ["haml"]
 				spawn: true
+			copy:
+				files: ["src/**/*.html"]
+				tasks: ["copy"]
+				spawn: true
 			livereload:
 				files: ["assets/**", "build/**"]
 				tasks: ["livereload"]
 
-	grunt.registerTask("build", ["haml", "compass", "coffee", "concat", "symlink"])
+	grunt.registerTask("build", ["copy", "haml", "compass", "coffee", "concat", "symlink"])
 	grunt.registerTask("default", ["clean", "build"])
 	grunt.registerTask("server", ["clean", "build", "livereload-start", "connect", "regarde"])
