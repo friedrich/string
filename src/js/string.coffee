@@ -264,7 +264,7 @@ class StringAnimation
 		@renderer.autoClear = false
 		@renderer.setClearColorHex(0xffffff, 1)
 		@renderer.setSize(@viewport_width, @viewport_height)
-		@display_container.appendChild(@renderer.domElement);
+		@display_container.appendChild(@renderer.domElement)
 
 		@scene = new THREE.Scene()
 		@overlay_scene = new THREE.Scene()
