@@ -29,9 +29,20 @@
         <p>
           The length of the string is set equal to one. Center of mass variables are chosen to make the string oscillate around the point of origin. This leaves us with the transverse oscillators as degrees of freedom. In the classical description the string is massive, except when all modes have zero amplitude which makes it massless (and boring).
         </p>
-        <!-- %h3.numbered Open String -->
-        <!-- \\[X^i = 2 \sqrt{2\alpha'} \sum_{n=1}^\infty \frac{1}{n} \left( a_n^i \sin(\pi cn\tau) - b_n^i \cos(\pi cn\tau) \right) \cos(\pi n\sigma) \] -->
-        <!-- %h3.numbered Closed String -->
+        <h3 class="numbered">Open String</h3>
+        <div class="latex">
+          \begin{align}
+            X^i &amp;= i \sqrt{2\alpha'} \sum_{n\in\mathbb{Z}_{\ne 0}} \frac{1}{n} \alpha_n^i e^{-\pi inc\tau} \cos(\pi n\sigma) \\
+            &amp;= 2 \sqrt{2\alpha'} \sum_{n=1}^\infty \frac{1}{n} \left( a_n^i \sin(\pi nc\tau) - b_n^i \cos(\pi nc\tau) \right) \cos(\pi n\sigma)
+          \end{align}
+        </div>
+        <h3 class="numbered">Closed String</h3>
+        <div class="latex">
+          \begin{align}
+            X^i &amp;= i \sqrt{\frac{\alpha'}{2}} \sum_{n\in\mathbb{Z}_{\ne 0}} \frac{1}{n} \left( \alpha_n^i e^{-2\pi in(c\tau+\sigma)} + \tilde\alpha_n^i e^{-2\pi in(c\tau-\sigma)} \right) \\
+            &amp;= \sqrt{2\alpha'} \sum_{n=1}^\infty \frac{1}{n} \left( a_n^i \sin(2\pi n(c\tau+\sigma)) - b_n^i \cos(2\pi n(c\tau+\sigma)) + \tilde{a}_n^i \sin(2\pi n(c\tau-\sigma)) - \tilde{b}_n^i \cos(2\pi n(c\tau-\sigma)) \right)
+          \end{align}
+        </div>
         <h2>References</h2>
         <ol>
           <li>
@@ -44,6 +55,6 @@
       </div>
     </div>
     <script src="/js/index.js"></script>
-    <!-- <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script> -->
+    <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
   </body>
 </html>
