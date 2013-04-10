@@ -310,10 +310,16 @@ class StringAnimation
 		return true
 
 	setup_rotation_control: ->
-		prev_mouse_position = {}
+		prev_mouse_position = null
 
-		mouse_move_listener = (e) =>
-			mouse_position = { x: e.clientX, y: e.clientY }
+		add_click_and_drag_listener @display_container, (reason, mouse_position, e) =>
+			if reason == "down"
+				prev_mouse_position = mouse_position
+				return
+			if reason == "up"
+				return
+			# reason == "move"
+
 			mouse_difference =
 				x: mouse_position.x - prev_mouse_position.x
 				y: mouse_position.y - prev_mouse_position.y
@@ -325,15 +331,6 @@ class StringAnimation
 			@horizontal_rotation = Math.min(@horizontal_rotation, Math.PI / 2)
 
 			@update_camera()
-
-		$(@display_container).on "mousedown", (e) =>
-			prev_mouse_position = { x: e.clientX, y: e.clientY }
-			$(@display_container).on "mousemove", mouse_move_listener
-
-		$(@display_container).on "mouseup", =>
-			$(@display_container).off "mousemove", mouse_move_listener
-		$(@display_container).on "mouseout", =>
-			$(@display_container).off "mousemove", mouse_move_listener
 
 	update_camera: ->
 		rotation = new THREE.Quaternion()
@@ -365,3 +362,44 @@ class StringAnimation
 	string_coordinates: (t, sigma) ->
 		coords = @string.coordinates_at_global_time(t, sigma)
 		return new THREE.Vector3(coords...)
+
+add_click_and_drag_listener = (element, callback) ->
+	offset = null
+	style = null
+
+	$(element).on "mousedown", (e) =>
+		e.preventDefault() # disable selecting text
+
+		$(document).on "mousemove", mouse_move_handler
+		$(document).on "mouseup", mouse_up_handler
+		$(document).on "mouseup", mouse_up_handler
+
+		offset = $(element).offset()
+		if window.getComputedStyle
+			desired_cursor = window.getComputedStyle(element, null).cursor
+			console.log desired_cursor
+			desired_cursor = "default" if !desired_cursor || desired_cursor == "auto"
+			style = $('<style type="text/css">* { cursor: ' + desired_cursor + ' !important; }</style>')
+		$("head").append(style) if style
+
+		callback("down", get_pos(e), e)
+		return true
+
+	get_pos = (e) =>
+		return {
+			x: e.pageX - offset.left
+			y: e.pageY - offset.top
+		}
+
+	mouse_move_handler = (e) =>
+		callback("move", get_pos(e), e)
+		return true
+
+	mouse_up_handler = (e) =>
+		$(document).off "mousemove", mouse_move_handler
+		$(document).off "mouseup", mouse_up_handler
+
+		style.detach() if style
+
+		callback("up", get_pos(e), e)
+		return true
