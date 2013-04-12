@@ -16,10 +16,13 @@ setTimeout2 = (a, b) ->
 #   the center of mass of x- equals one.
 # * Value of c follows.
 class String
-	regge_slope: 1 / 2
+	regge_slope: 1
 	tau_steps_per_fastest_revolution: 48
 
 	constructor: (@modes) ->
+		@modes[0] ||= []
+		@modes[1] ||= []
+
 		@stored_coordinates = {}
 		@calculate_velocity()
 		@calculate_top_mode()
@@ -129,7 +132,7 @@ class ClosedString extends String
 	calculate_velocity: ->
 		inverse_c_squared = 4 * @regge_slope * Math.PI * Math.PI * reduce @modes, 0, (sum, modesi) ->
 			sum + reduce modesi, 0, (sum1, mode) ->
-				sum1 + mode.a1 * mode.a1 + mode.b1 * mode.b1 + mode.a2 * mode.a2 + mode.b2 * mode.b2
+				sum1 + mode.a * mode.a + mode.b * mode.b + mode.c * mode.c + mode.d * mode.d
 		@c = 1 / Math.sqrt(inverse_c_squared)
 
 		@x_i_factor = Math.sqrt(2 * @regge_slope)
@@ -144,10 +147,10 @@ class ClosedString extends String
 
 		return @x_i_factor * reduce @modes[i-2], 0, (sum, mode) ->
 			sum + (
-				mode.a1 * Math.sin(mode.n * vplus) -
-				mode.b1 * Math.cos(mode.n * vplus) +
-				mode.a2 * Math.sin(mode.n * vminus) -
-				mode.b2 * Math.cos(mode.n * vminus)
+				mode.a * Math.sin(mode.n * vplus) -
+				mode.b * Math.cos(mode.n * vplus) +
+				mode.c * Math.sin(mode.n * vminus) -
+				mode.d * Math.cos(mode.n * vminus)
 			) / mode.n
 
 	y_m: (tau, sigma) ->
@@ -158,20 +161,20 @@ class ClosedString extends String
 			sum + reduce modesi, 0, (sum1, mode1) ->
 				sum1 + reduce modesi, 0, (sum2, mode2) ->
 					sum2 += (
-						(mode1.b1 * mode2.a1 + mode1.a1 * mode2.b1) * Math.cos((mode1.n + mode2.n) * vplus) +
-						(mode1.b1 * mode2.b1 - mode1.a1 * mode2.a1) * Math.sin((mode1.n + mode2.n) * vplus)
+						(mode1.b * mode2.a + mode1.a * mode2.b) * Math.cos((mode1.n + mode2.n) * vplus) +
+						(mode1.b * mode2.b - mode1.a * mode2.a) * Math.sin((mode1.n + mode2.n) * vplus)
 					) / (mode1.n + mode2.n)
 					sum2 += (
-						(mode1.b1 * mode2.a1 - mode1.a1 * mode2.b1) * Math.cos((mode1.n - mode2.n) * vplus) -
-						(mode1.b1 * mode2.b1 + mode1.a1 * mode2.a1) * Math.sin((mode1.n - mode2.n) * vplus)
+						(mode1.b * mode2.a - mode1.a * mode2.b) * Math.cos((mode1.n - mode2.n) * vplus) -
+						(mode1.b * mode2.b + mode1.a * mode2.a) * Math.sin((mode1.n - mode2.n) * vplus)
 					) / (mode1.n - mode2.n) if mode1.n != mode2.n
 					sum2 += (
-						(mode1.b2 * mode2.a2 + mode1.a2 * mode2.b2) * Math.cos((mode1.n + mode2.n) * vminus) +
-						(mode1.b2 * mode2.b2 - mode1.a2 * mode2.a2) * Math.sin((mode1.n + mode2.n) * vminus)
+						(mode1.d * mode2.c + mode1.c * mode2.d) * Math.cos((mode1.n + mode2.n) * vminus) +
+						(mode1.d * mode2.d - mode1.c * mode2.c) * Math.sin((mode1.n + mode2.n) * vminus)
 					) / (mode1.n + mode2.n)
 					sum2 += (
-						(mode1.b2 * mode2.a2 - mode1.a2 * mode2.b2) * Math.cos((mode1.n - mode2.n) * vminus) -
-						(mode1.b2 * mode2.b2 + mode1.a2 * mode2.a2) * Math.sin((mode1.n - mode2.n) * vminus)
+						(mode1.d * mode2.c - mode1.c * mode2.d) * Math.cos((mode1.n - mode2.n) * vminus) -
+						(mode1.d * mode2.d + mode1.c * mode2.c) * Math.sin((mode1.n - mode2.n) * vminus)
 					) / (mode1.n - mode2.n) if mode1.n != mode2.n
 					sum2
 
@@ -181,6 +184,7 @@ class StringAnimation
 
 	constructor: (@container) ->
 		return unless @init_display()
+		@load_settings()
 		@init_controls()
 		@setup_rotation_control()
 		@init_animation()
@@ -189,89 +193,116 @@ class StringAnimation
 	init_animation: ->
 		@clock = new THREE.Clock()
 		@animation_time = 0
-		@update_string([[],[]])
 
-	update_string: (modes) ->
-		# settings = JSON.parse(@mode_control_textarea.value)
-		settings = { open: true, modes: modes }
-		@open_string = settings.open
-
-		settings.modes = modes.map (modesi) ->
-			modesi.modes = modesi.filter (mode) ->
-				if settings.open
-					mode.a != 0 || mode.b != 0
+	update_string: ->
+		modes = @indexed_modes.map (indexed_modesi) =>
+			modesi = []
+			for n of indexed_modesi
+				mode = indexed_modesi[n]
+				if @string_type == "closed"
+					modesi.push(mode) if mode.a || mode.b || mode.c || mode.d
 				else
-					mode.a1 != 0 || mode.a2 != 0 || mode.b1 != 0 || mode.b2 != 0
+					modesi.push(mode) if mode.a || mode.b
+			modesi
 
 		@string =
-			if @open_string
-				new OpenString(settings.modes)
+			if @string_type == "closed"
+				new ClosedString(modes)
 			else
-				new ClosedString(settings.modes)
+				new OpenString(modes)
 
 	update_site_uri: ->
 		if window.history && history.replaceState
 			history.replaceState(null, "", "#" + encodeURIComponent(@mode_control_textarea.value))
 
-	init_controls: ->
+	get_mode: (n, i) ->
+		modesi = (@indexed_modes[i-2] || {})[n]
+
+	set_mode: (n, i, settings) ->
+		modesi = @indexed_modes[i-2] ||= {}
+		mode = modesi[n] ||= { n }
+		$.extend(mode, settings)
+		mode.a ||= 0
+		mode.b ||= 0
+		mode.c ||= 0
+		mode.d ||= 0
+
+	load_settings: ->
+		@string_type = "open"
+		@indexed_modes = []
+
+		config_string = (window.location.search || "") + (window.location.hash || "")
+
+		mode_search = /([ab])_(\d+)_(\d+)=([-+]?\d*\.?\d+)/g
+		while (match = mode_search.exec(config_string))
+			kind = match[1]
+			n = parseInt(match[2])
+			i = parseInt(match[3])
+			amplitude = parseFloat(match[4])
+
+			settings = {}
+			settings[kind] = amplitude
+			@set_mode(n, i, settings)
+
+		if @indexed_modes.length == 0
+			@set_mode(1, 2, { a: 0.5 })
+
+	save_settings: ->
+		settings = ""
+		for i in [0..@indexed_modes.length-1]
+			modesi = @indexed_modes[i]
+			i += 2
+			for n of modesi
+				mode = modesi[n]
+				settings += "a_" + n + "_" + i + "=" + mode.a.toFixed(3) if mode.a
+				settings += "b_" + n + "_" + i + "=" + mode.b.toFixed(3) if mode.b
+				if @string_type == "closed"
+					settings += "c_" + n + "_" + i + "=" + mode.c.toFixed(3) if mode.a
+					settings += "d_" + n + "_" + i + "=" + mode.d.toFixed(3) if mode.b
+		window.location.hash = settings
+
+	init_controls: () ->
 		controls_table = $(@container).find("table[data-string-modes-table]")[0]
-		if controls_table
-			modes = []
-			max_i = 3
-			max_mode = 8
 
-			table_cells = [1..max_i].map (i) =>
-				if i != 1
-					modesi = []
-					modes.push(modesi)
+		max_i = 3
+		max_mode = 8
 
-				[0..max_mode].map (n) =>
-					cell = document.createElement(if i == 1 || n == 0 then "th" else "td")
-					if i == 1 && n == 0
-						;
-					else if i == 1
-						cell.textContent = n
-					else if n == 0
-						cell.textContent = i
-					else
-						mode = { n: n, a: 0, b: 0 }
-						modesi.push(mode)
+		table_cells = [1..max_i].map (i) =>
+			[0..max_mode].map (n) =>
+				cell = document.createElement(if i == 1 || n == 0 then "th" else "td")
+				if i == 1 && n == 0
+					;
+				else if i == 1
+					cell.textContent = n
+				else if n == 0
+					cell.textContent = "i = " + i
+				else
+					mode = @get_mode(n, i) || {}
+					control = new AmplitudeControl
+						max: 0.5
+						size: 40
+						x: mode.a
+						y: mode.b
+						changed: (control) =>
+							@set_mode(n, i, { a: control.x, b: control.y })
+							@update_string()
+							@save_settings()
+					cell.appendChild(control.element)
+				cell
 
-						control = new AmplitudeControl
-							max: 2
-							size: 40
-							changed: (control) =>
-								mode.a = control.x
-								mode.b = control.y
-								@update_string($.extend(true, [], modes)) # deep copy
-						cell.appendChild(control.element)
-					cell
+		for n in [0..max_mode]
+			tr = document.createElement("tr")
+			controls_table.appendChild(tr)
+			for i in [2, 1, 3]
+				tr.appendChild(table_cells[i-1][n])
 
-			console.log table_cells
-			for n in [0..max_mode]
-				tr = document.createElement("tr")
-				controls_table.appendChild(tr)
-				for i in [1..max_i]
-					tr.appendChild(table_cells[i-1][n])
+		# @type_control_button = $(@container).find("button[data-string-type]")[0]
+		# if @type_control_button
+		# 	$(@type_control_button).on "click", =>
+		# 		@open_string = !@open_string
+		# 		@update_string()
 
-		@mode_control_textarea = $(@container).find("[data-string-modes]")[0]
-		if @mode_control_textarea
-			if window.location.hash
-				settings = window.location.hash.replace(/^#/, "")
-				settings = decodeURIComponent(settings)
-			else
-				settings = '{"open": true,\n"modes": [[\n{ "n": 1, "a": 0.5, "b": 0 },\n{ "n": 2, "a": 0.5, "b": 0 }\n],[\n]]}'
-			@mode_control_textarea.value = settings
-
-			$(@mode_control_textarea).on "blur", =>
-				@update_string()
-				@update_site_uri()
-
-		@type_control_button = $(@container).find("button[data-string-type]")[0]
-		if @type_control_button
-			$(@type_control_button).on "click", =>
-				@open_string = !@open_string
-				@update_string()
+		@update_string()
 
 	show_not_supported: ->
 		@display_container.innerHTML = "<p>Not possible with your browser :-(</p>"
@@ -487,7 +518,8 @@ class AmplitudeControl
 			@x = 0
 			@y = 0
 			@r = 0
-		@phi = Math.atan2(@y, @x)
+		if @x || @y || !@phi?
+			@phi = Math.atan2(@y, @x)
 
 		if @r == 0
 			@context.strokeStyle = "#aaaaaa"

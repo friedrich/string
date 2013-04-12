@@ -30,12 +30,16 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
   };
 
   String = (function() {
-    String.prototype.regge_slope = 1 / 2;
+    String.prototype.regge_slope = 1;
 
     String.prototype.tau_steps_per_fastest_revolution = 48;
 
     function String(modes) {
+      var _base, _base1;
+
       this.modes = modes;
+      (_base = this.modes)[0] || (_base[0] = []);
+      (_base1 = this.modes)[1] || (_base1[1] = []);
       this.stored_coordinates = {};
       this.calculate_velocity();
       this.calculate_top_mode();
@@ -173,7 +177,7 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
 
       inverse_c_squared = 4 * this.regge_slope * Math.PI * Math.PI * reduce(this.modes, 0, function(sum, modesi) {
         return sum + reduce(modesi, 0, function(sum1, mode) {
-          return sum1 + mode.a1 * mode.a1 + mode.b1 * mode.b1 + mode.a2 * mode.a2 + mode.b2 * mode.b2;
+          return sum1 + mode.a * mode.a + mode.b * mode.b + mode.c * mode.c + mode.d * mode.d;
         });
       });
       this.c = 1 / Math.sqrt(inverse_c_squared);
@@ -191,7 +195,7 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
       vplus = 2 * Math.PI * (this.c * tau + sigma);
       vminus = 2 * Math.PI * (this.c * tau - sigma);
       return this.x_i_factor * reduce(this.modes[i - 2], 0, function(sum, mode) {
-        return sum + (mode.a1 * Math.sin(mode.n * vplus) - mode.b1 * Math.cos(mode.n * vplus) + mode.a2 * Math.sin(mode.n * vminus) - mode.b2 * Math.cos(mode.n * vminus)) / mode.n;
+        return sum + (mode.a * Math.sin(mode.n * vplus) - mode.b * Math.cos(mode.n * vplus) + mode.c * Math.sin(mode.n * vminus) - mode.d * Math.cos(mode.n * vminus)) / mode.n;
       });
     };
 
@@ -203,13 +207,13 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
       return this.y_m_factor * reduce(this.modes, 0, function(sum, modesi) {
         return sum + reduce(modesi, 0, function(sum1, mode1) {
           return sum1 + reduce(modesi, 0, function(sum2, mode2) {
-            sum2 += ((mode1.b1 * mode2.a1 + mode1.a1 * mode2.b1) * Math.cos((mode1.n + mode2.n) * vplus) + (mode1.b1 * mode2.b1 - mode1.a1 * mode2.a1) * Math.sin((mode1.n + mode2.n) * vplus)) / (mode1.n + mode2.n);
+            sum2 += ((mode1.b * mode2.a + mode1.a * mode2.b) * Math.cos((mode1.n + mode2.n) * vplus) + (mode1.b * mode2.b - mode1.a * mode2.a) * Math.sin((mode1.n + mode2.n) * vplus)) / (mode1.n + mode2.n);
             if (mode1.n !== mode2.n) {
-              sum2 += ((mode1.b1 * mode2.a1 - mode1.a1 * mode2.b1) * Math.cos((mode1.n - mode2.n) * vplus) - (mode1.b1 * mode2.b1 + mode1.a1 * mode2.a1) * Math.sin((mode1.n - mode2.n) * vplus)) / (mode1.n - mode2.n);
+              sum2 += ((mode1.b * mode2.a - mode1.a * mode2.b) * Math.cos((mode1.n - mode2.n) * vplus) - (mode1.b * mode2.b + mode1.a * mode2.a) * Math.sin((mode1.n - mode2.n) * vplus)) / (mode1.n - mode2.n);
             }
-            sum2 += ((mode1.b2 * mode2.a2 + mode1.a2 * mode2.b2) * Math.cos((mode1.n + mode2.n) * vminus) + (mode1.b2 * mode2.b2 - mode1.a2 * mode2.a2) * Math.sin((mode1.n + mode2.n) * vminus)) / (mode1.n + mode2.n);
+            sum2 += ((mode1.d * mode2.c + mode1.c * mode2.d) * Math.cos((mode1.n + mode2.n) * vminus) + (mode1.d * mode2.d - mode1.c * mode2.c) * Math.sin((mode1.n + mode2.n) * vminus)) / (mode1.n + mode2.n);
             if (mode1.n !== mode2.n) {
-              sum2 += ((mode1.b2 * mode2.a2 - mode1.a2 * mode2.b2) * Math.cos((mode1.n - mode2.n) * vminus) - (mode1.b2 * mode2.b2 + mode1.a2 * mode2.a2) * Math.sin((mode1.n - mode2.n) * vminus)) / (mode1.n - mode2.n);
+              sum2 += ((mode1.d * mode2.c - mode1.c * mode2.d) * Math.cos((mode1.n - mode2.n) * vminus) - (mode1.d * mode2.d + mode1.c * mode2.c) * Math.sin((mode1.n - mode2.n) * vminus)) / (mode1.n - mode2.n);
             }
             return sum2;
           });
@@ -229,6 +233,7 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
       if (!this.init_display()) {
         return;
       }
+      this.load_settings();
       this.init_controls();
       this.setup_rotation_control();
       this.init_animation();
@@ -237,28 +242,32 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
 
     StringAnimation.prototype.init_animation = function() {
       this.clock = new THREE.Clock();
-      this.animation_time = 0;
-      return this.update_string([[], []]);
+      return this.animation_time = 0;
     };
 
-    StringAnimation.prototype.update_string = function(modes) {
-      var settings;
+    StringAnimation.prototype.update_string = function() {
+      var modes,
+        _this = this;
 
-      settings = {
-        open: true,
-        modes: modes
-      };
-      this.open_string = settings.open;
-      settings.modes = modes.map(function(modesi) {
-        return modesi.modes = modesi.filter(function(mode) {
-          if (settings.open) {
-            return mode.a !== 0 || mode.b !== 0;
+      modes = this.indexed_modes.map(function(indexed_modesi) {
+        var mode, modesi, n;
+
+        modesi = [];
+        for (n in indexed_modesi) {
+          mode = indexed_modesi[n];
+          if (_this.string_type === "closed") {
+            if (mode.a || mode.b || mode.c || mode.d) {
+              modesi.push(mode);
+            }
           } else {
-            return mode.a1 !== 0 || mode.a2 !== 0 || mode.b1 !== 0 || mode.b2 !== 0;
+            if (mode.a || mode.b) {
+              modesi.push(mode);
+            }
           }
-        });
+        }
+        return modesi;
       });
-      return this.string = this.open_string ? new OpenString(settings.modes) : new ClosedString(settings.modes);
+      return this.string = this.string_type === "closed" ? new ClosedString(modes) : new OpenString(modes);
     };
 
     StringAnimation.prototype.update_site_uri = function() {
@@ -267,91 +276,136 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
       }
     };
 
+    StringAnimation.prototype.get_mode = function(n, i) {
+      var modesi;
+
+      return modesi = (this.indexed_modes[i - 2] || {})[n];
+    };
+
+    StringAnimation.prototype.set_mode = function(n, i, settings) {
+      var mode, modesi, _base, _name;
+
+      modesi = (_base = this.indexed_modes)[_name = i - 2] || (_base[_name] = {});
+      mode = modesi[n] || (modesi[n] = {
+        n: n
+      });
+      $.extend(mode, settings);
+      mode.a || (mode.a = 0);
+      mode.b || (mode.b = 0);
+      mode.c || (mode.c = 0);
+      return mode.d || (mode.d = 0);
+    };
+
+    StringAnimation.prototype.load_settings = function() {
+      var amplitude, config_string, i, kind, match, mode_search, n, settings;
+
+      this.string_type = "open";
+      this.indexed_modes = [];
+      config_string = (window.location.search || "") + (window.location.hash || "");
+      mode_search = /([ab])_(\d+)_(\d+)=([-+]?\d*\.?\d+)/g;
+      while ((match = mode_search.exec(config_string))) {
+        kind = match[1];
+        n = parseInt(match[2]);
+        i = parseInt(match[3]);
+        amplitude = parseFloat(match[4]);
+        settings = {};
+        settings[kind] = amplitude;
+        this.set_mode(n, i, settings);
+      }
+      if (this.indexed_modes.length === 0) {
+        return this.set_mode(1, 2, {
+          a: 0.5
+        });
+      }
+    };
+
+    StringAnimation.prototype.save_settings = function() {
+      var i, mode, modesi, n, settings, _i, _ref2;
+
+      settings = "";
+      for (i = _i = 0, _ref2 = this.indexed_modes.length - 1; 0 <= _ref2 ? _i <= _ref2 : _i >= _ref2; i = 0 <= _ref2 ? ++_i : --_i) {
+        modesi = this.indexed_modes[i];
+        i += 2;
+        for (n in modesi) {
+          mode = modesi[n];
+          if (mode.a) {
+            settings += "a_" + n + "_" + i + "=" + mode.a.toFixed(3);
+          }
+          if (mode.b) {
+            settings += "b_" + n + "_" + i + "=" + mode.b.toFixed(3);
+          }
+          if (this.string_type === "closed") {
+            if (mode.a) {
+              settings += "c_" + n + "_" + i + "=" + mode.c.toFixed(3);
+            }
+            if (mode.b) {
+              settings += "d_" + n + "_" + i + "=" + mode.d.toFixed(3);
+            }
+          }
+        }
+      }
+      return window.location.hash = settings;
+    };
+
     StringAnimation.prototype.init_controls = function() {
-      var controls_table, i, max_i, max_mode, modes, n, settings, table_cells, tr, _i, _j, _k, _results,
+      var controls_table, i, max_i, max_mode, n, table_cells, tr, _i, _j, _k, _len, _ref2, _results,
         _this = this;
 
       controls_table = $(this.container).find("table[data-string-modes-table]")[0];
-      if (controls_table) {
-        modes = [];
-        max_i = 3;
-        max_mode = 8;
-        table_cells = (function() {
+      max_i = 3;
+      max_mode = 8;
+      table_cells = (function() {
+        _results = [];
+        for (var _i = 1; 1 <= max_i ? _i <= max_i : _i >= max_i; 1 <= max_i ? _i++ : _i--){ _results.push(_i); }
+        return _results;
+      }).apply(this).map(function(i) {
+        var _i, _results;
+
+        return (function() {
           _results = [];
-          for (var _i = 1; 1 <= max_i ? _i <= max_i : _i >= max_i; 1 <= max_i ? _i++ : _i--){ _results.push(_i); }
+          for (var _i = 0; 0 <= max_mode ? _i <= max_mode : _i >= max_mode; 0 <= max_mode ? _i++ : _i--){ _results.push(_i); }
           return _results;
-        }).apply(this).map(function(i) {
-          var modesi, _i, _results;
+        }).apply(this).map(function(n) {
+          var cell, control, mode;
 
-          if (i !== 1) {
-            modesi = [];
-            modes.push(modesi);
+          cell = document.createElement(i === 1 || n === 0 ? "th" : "td");
+          if (i === 1 && n === 0) {
+
+          } else if (i === 1) {
+            cell.textContent = n;
+          } else if (n === 0) {
+            cell.textContent = "i = " + i;
+          } else {
+            mode = _this.get_mode(n, i) || {};
+            control = new AmplitudeControl({
+              max: 0.5,
+              size: 40,
+              x: mode.a,
+              y: mode.b,
+              changed: function(control) {
+                _this.set_mode(n, i, {
+                  a: control.x,
+                  b: control.y
+                });
+                _this.update_string();
+                return _this.save_settings();
+              }
+            });
+            cell.appendChild(control.element);
           }
-          return (function() {
-            _results = [];
-            for (var _i = 0; 0 <= max_mode ? _i <= max_mode : _i >= max_mode; 0 <= max_mode ? _i++ : _i--){ _results.push(_i); }
-            return _results;
-          }).apply(this).map(function(n) {
-            var cell, control, mode;
-
-            cell = document.createElement(i === 1 || n === 0 ? "th" : "td");
-            if (i === 1 && n === 0) {
-
-            } else if (i === 1) {
-              cell.textContent = n;
-            } else if (n === 0) {
-              cell.textContent = i;
-            } else {
-              mode = {
-                n: n,
-                a: 0,
-                b: 0
-              };
-              modesi.push(mode);
-              control = new AmplitudeControl({
-                max: 2,
-                size: 40,
-                changed: function(control) {
-                  mode.a = control.x;
-                  mode.b = control.y;
-                  return _this.update_string($.extend(true, [], modes));
-                }
-              });
-              cell.appendChild(control.element);
-            }
-            return cell;
-          });
+          return cell;
         });
-        console.log(table_cells);
-        for (n = _j = 0; 0 <= max_mode ? _j <= max_mode : _j >= max_mode; n = 0 <= max_mode ? ++_j : --_j) {
-          tr = document.createElement("tr");
-          controls_table.appendChild(tr);
-          for (i = _k = 1; 1 <= max_i ? _k <= max_i : _k >= max_i; i = 1 <= max_i ? ++_k : --_k) {
-            tr.appendChild(table_cells[i - 1][n]);
-          }
+      });
+      for (n = _j = 0; 0 <= max_mode ? _j <= max_mode : _j >= max_mode; n = 0 <= max_mode ? ++_j : --_j) {
+        tr = document.createElement("tr");
+        controls_table.appendChild(tr);
+        _ref2 = [2, 1, 3];
+        for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
+          i = _ref2[_k];
+          tr.appendChild(table_cells[i - 1][n]);
         }
       }
-      this.mode_control_textarea = $(this.container).find("[data-string-modes]")[0];
-      if (this.mode_control_textarea) {
-        if (window.location.hash) {
-          settings = window.location.hash.replace(/^#/, "");
-          settings = decodeURIComponent(settings);
-        } else {
-          settings = '{"open": true,\n"modes": [[\n{ "n": 1, "a": 0.5, "b": 0 },\n{ "n": 2, "a": 0.5, "b": 0 }\n],[\n]]}';
-        }
-        this.mode_control_textarea.value = settings;
-        $(this.mode_control_textarea).on("blur", function() {
-          _this.update_string();
-          return _this.update_site_uri();
-        });
-      }
-      this.type_control_button = $(this.container).find("button[data-string-type]")[0];
-      if (this.type_control_button) {
-        return $(this.type_control_button).on("click", function() {
-          _this.open_string = !_this.open_string;
-          return _this.update_string();
-        });
-      }
+      return this.update_string();
     };
 
     StringAnimation.prototype.show_not_supported = function() {
@@ -498,11 +552,7 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
       var coords;
 
       coords = this.string.coordinates_at_global_time(t, sigma);
-      return (function(func, args, ctor) {
-        ctor.prototype = func.prototype;
-        var child = new ctor, result = func.apply(child, args);
-        return Object(result) === result ? result : child;
-      })(THREE.Vector3, coords, function(){});
+      return new THREE.Vector3(coords[1], coords[2], coords[0]);
     };
 
     return StringAnimation;
@@ -616,7 +666,9 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
         this.y = 0;
         this.r = 0;
       }
-      this.phi = Math.atan2(this.y, this.x);
+      if (this.x || this.y || (this.phi == null)) {
+        this.phi = Math.atan2(this.y, this.x);
+      }
       if (this.r === 0) {
         this.context.strokeStyle = "#aaaaaa";
       } else {
