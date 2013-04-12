@@ -308,7 +308,10 @@
         this.set_mode(n, i, settings);
       }
       if (this.indexed_modes.length === 0) {
-        return this.set_mode(1, 2, {
+        this.set_mode(1, 2, {
+          a: 0.5
+        });
+        return this.set_mode(2, 2, {
           a: 0.5
         });
       }
@@ -456,7 +459,7 @@
       this.axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), 1, 0x00ff00));
       this.axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(), 1, 0x0000ff));
       this.axis_object.scale = new THREE.Vector3(0.15, 0.15, 0.15);
-      this.axis_object.position = new THREE.Vector3(0.2 - 1, 0.2 - this.viewport_height / this.viewport_width, 0);
+      this.axis_object.position = new THREE.Vector3(1 - 0.2, 0.2 - this.viewport_height / this.viewport_width, 0);
       this.axis_object.useQuaternion = true;
       this.overlay_scene.add(this.axis_object);
       this.camera = new THREE.PerspectiveCamera(75, this.viewport_width / this.viewport_height, 0.1, 1000);
@@ -505,7 +508,7 @@
       var rotation;
 
       rotation = new THREE.Quaternion();
-      rotation.setFromEuler(new THREE.Vector3(this.horizontal_rotation, 0, this.vertical_rotation));
+      rotation.setFromEuler(new THREE.Vector3(this.horizontal_rotation - Math.PI / 2, 0, this.vertical_rotation + Math.PI));
       this.axis_object.quaternion = rotation;
       return this.string_object.quaternion = rotation;
     };

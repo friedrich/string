@@ -246,6 +246,7 @@ class StringAnimation
 
 		if @indexed_modes.length == 0
 			@set_mode(1, 2, { a: 0.5 })
+			@set_mode(2, 2, { a: 0.5 })
 
 	save_settings: ->
 		settings = ""
@@ -359,7 +360,7 @@ class StringAnimation
 		@axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), new THREE.Vector3(), 1, 0x00ff00))
 		@axis_object.add(new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), new THREE.Vector3(), 1, 0x0000ff))
 		@axis_object.scale = new THREE.Vector3(0.15, 0.15, 0.15)
-		@axis_object.position = new THREE.Vector3(0.2 - 1, 0.2 - @viewport_height / @viewport_width, 0)
+		@axis_object.position = new THREE.Vector3(1 - 0.2, 0.2 - @viewport_height / @viewport_width, 0)
 		@axis_object.useQuaternion = true
 
 		@overlay_scene.add(@axis_object)
@@ -406,7 +407,7 @@ class StringAnimation
 
 	update_camera: ->
 		rotation = new THREE.Quaternion()
-		rotation.setFromEuler(new THREE.Vector3(@horizontal_rotation, 0, @vertical_rotation))
+		rotation.setFromEuler(new THREE.Vector3(@horizontal_rotation - Math.PI / 2, 0, @vertical_rotation + Math.PI))
 
 		@axis_object.quaternion = rotation
 		@string_object.quaternion = rotation
@@ -433,7 +434,7 @@ class StringAnimation
 
 	string_coordinates: (t, sigma) ->
 		coords = @string.coordinates_at_global_time(t, sigma)
-		return new THREE.Vector3(coords...)
+		return new THREE.Vector3(coords[1], coords[2], coords[0])
 
 add_click_and_drag_listener = (element, callback) ->
 	offset = null
