@@ -1,6 +1,6 @@
 (function() {
   "use strict";
-  var ClosedString, OpenString, String, StringAnimation, reduce, setTimeout2, _ref, _ref1,
+  var AmplitudeControl, ClosedString, OpenString, String, StringAnimation, add_click_and_drag_listener, reduce, setTimeout2, _ref, _ref1,
     __hasProp = {}.hasOwnProperty,
     __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
@@ -217,7 +217,7 @@
   })(String);
 
   StringAnimation = (function() {
-    StringAnimation.prototype.string_segments = 64;
+    StringAnimation.prototype.string_segments = 80;
 
     function StringAnimation(container) {
       this.container = container;
@@ -233,15 +233,18 @@
     StringAnimation.prototype.init_animation = function() {
       this.clock = new THREE.Clock();
       this.animation_time = 0;
-      return this.update_string();
+      return this.update_string([[], []]);
     };
 
-    StringAnimation.prototype.update_string = function() {
+    StringAnimation.prototype.update_string = function(modes) {
       var settings;
 
-      settings = JSON.parse(this.mode_control_textarea.value);
+      settings = {
+        open: true,
+        modes: modes
+      };
       this.open_string = settings.open;
-      settings.modes = settings.modes.map(function(modesi) {
+      settings.modes = modes.map(function(modesi) {
         return modesi.modes = modesi.filter(function(mode) {
           if (settings.open) {
             return mode.a !== 0 || mode.b !== 0;
@@ -260,9 +263,69 @@
     };
 
     StringAnimation.prototype.init_controls = function() {
-      var settings,
+      var controls_table, i, max_i, max_mode, modes, n, settings, table_cells, tr, _i, _j, _k, _results,
         _this = this;
 
+      controls_table = $(this.container).find("table[data-string-modes-table]")[0];
+      if (controls_table) {
+        modes = [];
+        max_i = 3;
+        max_mode = 8;
+        table_cells = (function() {
+          _results = [];
+          for (var _i = 1; 1 <= max_i ? _i <= max_i : _i >= max_i; 1 <= max_i ? _i++ : _i--){ _results.push(_i); }
+          return _results;
+        }).apply(this).map(function(i) {
+          var modesi, _i, _results;
+
+          if (i !== 1) {
+            modesi = [];
+            modes.push(modesi);
+          }
+          return (function() {
+            _results = [];
+            for (var _i = 0; 0 <= max_mode ? _i <= max_mode : _i >= max_mode; 0 <= max_mode ? _i++ : _i--){ _results.push(_i); }
+            return _results;
+          }).apply(this).map(function(n) {
+            var cell, control, mode;
+
+            cell = document.createElement(i === 1 || n === 0 ? "th" : "td");
+            if (i === 1 && n === 0) {
+
+            } else if (i === 1) {
+              cell.textContent = n;
+            } else if (n === 0) {
+              cell.textContent = i;
+            } else {
+              mode = {
+                n: n,
+                a: 0,
+                b: 0
+              };
+              modesi.push(mode);
+              control = new AmplitudeControl({
+                max: 2,
+                size: 40,
+                changed: function(control) {
+                  mode.a = control.x;
+                  mode.b = control.y;
+                  return _this.update_string($.extend(true, [], modes));
+                }
+              });
+              cell.appendChild(control.element);
+            }
+            return cell;
+          });
+        });
+        console.log(table_cells);
+        for (n = _j = 0; 0 <= max_mode ? _j <= max_mode : _j >= max_mode; n = 0 <= max_mode ? ++_j : --_j) {
+          tr = document.createElement("tr");
+          controls_table.appendChild(tr);
+          for (i = _k = 1; 1 <= max_i ? _k <= max_i : _k >= max_i; i = 1 <= max_i ? ++_k : --_k) {
+            tr.appendChild(table_cells[i - 1][n]);
+          }
+        }
+      }
       this.mode_control_textarea = $(this.container).find("[data-string-modes]")[0];
       if (this.mode_control_textarea) {
         if (window.location.hash) {
@@ -357,17 +420,20 @@
     };
 
     StringAnimation.prototype.setup_rotation_control = function() {
-      var mouse_move_listener, prev_mouse_position,
+      var prev_mouse_position,
         _this = this;
 
-      prev_mouse_position = {};
-      mouse_move_listener = function(e) {
-        var mouse_difference, mouse_position;
+      prev_mouse_position = null;
+      return add_click_and_drag_listener(this.display_container, function(reason, mouse_position, e) {
+        var mouse_difference;
 
-        mouse_position = {
-          x: e.clientX,
-          y: e.clientY
-        };
+        if (reason === "down") {
+          prev_mouse_position = mouse_position;
+          return;
+        }
+        if (reason === "up") {
+          return;
+        }
         mouse_difference = {
           x: mouse_position.x - prev_mouse_position.x,
           y: mouse_position.y - prev_mouse_position.y
@@ -378,19 +444,6 @@
         _this.horizontal_rotation = Math.max(_this.horizontal_rotation, -Math.PI / 2);
         _this.horizontal_rotation = Math.min(_this.horizontal_rotation, Math.PI / 2);
         return _this.update_camera();
-      };
-      $(this.display_container).on("mousedown", function(e) {
-        prev_mouse_position = {
-          x: e.clientX,
-          y: e.clientY
-        };
-        return $(_this.display_container).on("mousemove", mouse_move_listener);
-      });
-      $(this.display_container).on("mouseup", function() {
-        return $(_this.display_container).off("mousemove", mouse_move_listener);
-      });
-      return $(this.display_container).on("mouseout", function() {
-        return $(_this.display_container).off("mousemove", mouse_move_listener);
       });
     };
 
@@ -448,6 +501,136 @@
     };
 
     return StringAnimation;
+
+  })();
+
+  add_click_and_drag_listener = function(element, callback) {
+    var get_pos, mouse_move_handler, mouse_up_handler, offset, style,
+      _this = this;
+
+    offset = null;
+    style = null;
+    $(element).on("mousedown", function(e) {
+      var desired_cursor;
+
+      e.preventDefault();
+      $(document).on("mousemove", mouse_move_handler);
+      $(document).on("mouseup", mouse_up_handler);
+      offset = $(element).offset();
+      if (window.getComputedStyle) {
+        desired_cursor = window.getComputedStyle(element, null).cursor;
+        if (!desired_cursor || desired_cursor === "auto") {
+          desired_cursor = "default";
+        }
+        style = $('<style type="text/css">* { cursor: ' + desired_cursor + ' !important; }</style>');
+      }
+      if (style) {
+        $("head").append(style);
+      }
+      callback("down", get_pos(e), e);
+      return true;
+    });
+    get_pos = function(e) {
+      return {
+        x: e.pageX - offset.left,
+        y: e.pageY - offset.top
+      };
+    };
+    mouse_move_handler = function(e) {
+      callback("move", get_pos(e), e);
+      return true;
+    };
+    return mouse_up_handler = function(e) {
+      $(document).off("mousemove", mouse_move_handler);
+      $(document).off("mouseup", mouse_up_handler);
+      if (style) {
+        style.detach();
+      }
+      callback("up", get_pos(e), e);
+      return true;
+    };
+  };
+
+  AmplitudeControl = (function() {
+    function AmplitudeControl(settings) {
+      var _this = this;
+
+      if (settings == null) {
+        settings = {};
+      }
+      this.max = settings.max || 1;
+      this.zero_snap_ratio = settings.zero_snap_value || 0.2;
+      this.x = settings.x || 0;
+      this.y = settings.y || 0;
+      this.size = settings.size || 50;
+      this.element = document.createElement("canvas");
+      this.element.width = this.size;
+      this.element.height = this.size;
+      this.context = this.element.getContext("2d");
+      this.gauge_radius = (this.size - 2) / 2;
+      this.scaling = this.max / this.gauge_radius;
+      this.update(this.x, this.y);
+      add_click_and_drag_listener(this.element, function(reason, mouse_position, e) {
+        var oldX, oldY, tryX, tryY;
+
+        if (reason === "up") {
+          if (settings.changed && (_this.initialX !== _this.x || _this.initialY !== _this.y)) {
+            settings.changed(_this);
+          }
+          return;
+        }
+        if (reason === "down") {
+          _this.initialX = _this.x;
+          _this.initialY = _this.y;
+        }
+        oldX = _this.x;
+        oldY = _this.y;
+        tryX = (mouse_position.x - _this.size / 2) * _this.scaling;
+        tryY = (_this.size / 2 - mouse_position.y) * _this.scaling;
+        _this.update(tryX, tryY, true);
+        if (settings.changing && (oldX !== _this.x || oldY !== _this.y)) {
+          return settings.changing(_this);
+        }
+      });
+    }
+
+    AmplitudeControl.prototype.update = function(x, y, snap_to_zero) {
+      this.x = x;
+      this.y = y;
+      if (snap_to_zero == null) {
+        snap_to_zero = false;
+      }
+      this.r = Math.sqrt(this.x * this.x + this.y * this.y);
+      if (this.r > this.max) {
+        this.x *= this.max / this.r;
+        this.y *= this.max / this.r;
+        this.r = this.max;
+      }
+      if (snap_to_zero && this.r < this.max * this.zero_snap_ratio) {
+        this.x = 0;
+        this.y = 0;
+        this.r = 0;
+      }
+      this.phi = Math.atan2(this.y, this.x);
+      if (this.r === 0) {
+        this.context.strokeStyle = "#aaaaaa";
+      } else {
+        this.context.strokeStyle = "rgb(" + Math.floor(this.r / this.max * 0xff) + ", 0, 0)";
+      }
+      this.context.lineWidth = 1;
+      this.context.clearRect(0, 0, this.size, this.size);
+      this.context.beginPath();
+      this.context.arc(this.size / 2, this.size / 2, this.gauge_radius, 0, 2 * Math.PI, false);
+      this.context.stroke();
+      this.context.strokeStyle = "black";
+      this.context.lineWidth = 2;
+      this.context.beginPath();
+      this.context.moveTo(this.size / 2, this.size / 2);
+      this.context.lineTo(this.size / 2 + this.x / this.scaling, this.size / 2 - this.y / this.scaling);
+      return this.context.stroke();
+    };
+
+    return AmplitudeControl;
 
   })();
 

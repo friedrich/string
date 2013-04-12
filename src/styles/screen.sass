@@ -26,7 +26,7 @@ $grid-padding: $gutter-width
   margin-bottom: 2em
 
   .display
-    +span-columns(9, 12)
+    +span-columns(10, 12)
     height: 100%
     +framed
     cursor: move
@@ -36,16 +36,15 @@ $grid-padding: $gutter-width
       margin: 2em
 
   .controls
-    +span-columns(3 omega, 12)
+    +span-columns(2 omega, 12)
     height: 100%
     +framed
 
-    textarea
-      width: 100%
-      height: 10em
-      border-style: none
-      font-family: Marcellus, sans-serif
-      font-size: 0.9em
+    .controls-table
+      margin: 3em auto
+
+    canvas
+      cursor: crosshair
 
 body
   font-family: Marcellus, sans-serif

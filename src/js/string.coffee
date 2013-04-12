@@ -177,7 +177,7 @@ class ClosedString extends String
 
 
 class StringAnimation
-	string_segments: 64
+	string_segments: 80
 
 	constructor: (@container) ->
 		return unless @init_display()
@@ -189,13 +189,14 @@ class StringAnimation
 	init_animation: ->
 		@clock = new THREE.Clock()
 		@animation_time = 0
-		@update_string()
+		@update_string([[],[]])
 
-	update_string: ->
-		settings = JSON.parse(@mode_control_textarea.value)
+	update_string: (modes) ->
+		# settings = JSON.parse(@mode_control_textarea.value)
+		settings = { open: true, modes: modes }
 		@open_string = settings.open
 
-		settings.modes = settings.modes.map (modesi) ->
+		settings.modes = modes.map (modesi) ->
 			modesi.modes = modesi.filter (mode) ->
 				if settings.open
 					mode.a != 0 || mode.b != 0
@@ -213,6 +214,46 @@ class StringAnimation
 			history.replaceState(null, "", "#" + encodeURIComponent(@mode_control_textarea.value))
 
 	init_controls: ->
+		controls_table = $(@container).find("table[data-string-modes-table]")[0]
+		if controls_table
+			modes = []
+			max_i = 3
+			max_mode = 8
+
+			table_cells = [1..max_i].map (i) =>
+				if i != 1
+					modesi = []
+					modes.push(modesi)
+
+				[0..max_mode].map (n) =>
+					cell = document.createElement(if i == 1 || n == 0 then "th" else "td")
+					if i == 1 && n == 0
+						;
+					else if i == 1
+						cell.textContent = n
+					else if n == 0
+						cell.textContent = i
+					else
+						mode = { n: n, a: 0, b: 0 }
+						modesi.push(mode)
+
+						control = new AmplitudeControl
+							max: 2
+							size: 40
+							changed: (control) =>
+								mode.a = control.x
+								mode.b = control.y
+								@update_string($.extend(true, [], modes)) # deep copy
+						cell.appendChild(control.element)
+					cell
+
+			console.log table_cells
+			for n in [0..max_mode]
+				tr = document.createElement("tr")
+				controls_table.appendChild(tr)
+				for i in [1..max_i]
+					tr.appendChild(table_cells[i-1][n])
+
 		@mode_control_textarea = $(@container).find("[data-string-modes]")[0]
 		if @mode_control_textarea
 			if window.location.hash
@@ -372,12 +413,10 @@ add_click_and_drag_listener = (element, callback) ->
 
 		$(document).on "mousemove", mouse_move_handler
 		$(document).on "mouseup", mouse_up_handler
-		$(document).on "mouseup", mouse_up_handler
 
 		offset = $(element).offset()
 		if window.getComputedStyle
 			desired_cursor = window.getComputedStyle(element, null).cursor
-			console.log desired_cursor
 			desired_cursor = "default" if !desired_cursor || desired_cursor == "auto"
 			style = $('<style type="text/css">* { cursor: ' + desired_cursor + ' !important; }</style>')
 		$("head").append(style) if style
@@ -403,3 +442,67 @@ add_click_and_drag_listener = (element, callback) ->
 
 		callback("up", get_pos(e), e)
 		return true
+
+class AmplitudeControl
+	constructor: (settings = {}) ->
+		@max = settings.max || 1
+		@zero_snap_ratio = settings.zero_snap_value || 0.2
+		@x = settings.x || 0
+		@y = settings.y || 0
+		@size = settings.size || 50
+
+		@element = document.createElement("canvas")
+		@element.width = @size
+		@element.height = @size
+		@context = @element.getContext("2d")
+
+		@gauge_radius = (@size - 2) / 2
+		@scaling = @max / @gauge_radius
+		@update(@x, @y)
+
+		add_click_and_drag_listener @element, (reason, mouse_position, e) =>
+			if reason == "up"
+				if settings.changed && (@initialX != @x || @initialY != @y)
+					settings.changed(this)
+				return
+			if reason == "down"
+				@initialX = @x
+				@initialY = @y
+
+			oldX = @x
+			oldY = @y
+			tryX = (mouse_position.x - @size / 2) * @scaling
+			tryY = (@size / 2 - mouse_position.y) * @scaling
+			@update(tryX, tryY, true)
+			if settings.changing && (oldX != @x || oldY != @y)
+				settings.changing(this)
+
+	update: (@x, @y, snap_to_zero = false) ->
+		@r = Math.sqrt(@x*@x + @y*@y)
+		if @r > @max
+			@x *= @max / @r
+			@y *= @max / @r
+			@r = @max
+		if snap_to_zero && @r < @max * @zero_snap_ratio
+			@x = 0
+			@y = 0
+			@r = 0
+		@phi = Math.atan2(@y, @x)
+
+		if @r == 0
+			@context.strokeStyle = "#aaaaaa"
+		else
+			@context.strokeStyle = "rgb(" + Math.floor(@r / @max * 0xff) + ", 0, 0)"
+
+		@context.lineWidth = 1
+		@context.clearRect(0, 0, @size, @size)
+		@context.beginPath()
+		@context.arc(@size / 2, @size / 2, @gauge_radius, 0, 2 * Math.PI, false)
+		@context.stroke()
+
+		@context.strokeStyle = "black"
+		@context.lineWidth = 2
+		@context.beginPath()
+		@context.moveTo(@size / 2, @size / 2)
+		@context.lineTo(@size / 2 + @x / @scaling, @size / 2 - @y / @scaling)
+		@context.stroke()

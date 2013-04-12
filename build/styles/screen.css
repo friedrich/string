@@ -50,7 +50,7 @@
   margin-bottom: 2em;
 }
 .string .display {
-  width: 74.57627%;
+  width: 83.05085%;
   float: left;
   margin-right: 1.69492%;
   display: inline;
@@ -63,7 +63,7 @@
   margin: 2em;
 }
 .string .controls {
-  width: 23.72881%;
+  width: 15.25424%;
   float: right;
   margin-right: 0;
   *margin-left: -1em;
@@ -71,12 +71,11 @@
   height: 100%;
   border: 1px solid black;
 }
-.string .controls textarea {
-  width: 100%;
-  height: 10em;
-  border-style: none;
-  font-family: Marcellus, sans-serif;
-  font-size: 0.9em;
+.string .controls .controls-table {
+  margin: 3em auto;
+}
+.string .controls canvas {
+  cursor: crosshair;
 }
 
 body {
