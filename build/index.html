@@ -27,22 +27,36 @@
       <div class="description">
         <h2 class="numbered">Calculations</h2>
         <p>
-          The length of the string is set equal to one. Center of mass variables are chosen to make the string oscillate around the point of origin. This leaves us with the transverse oscillators as degrees of freedom. In the classical description the string is massive, except when all modes have zero amplitude which makes it massless (and boring).
+          The length of the string is set equal to one. Center of mass variables are chosen to make the string oscillate around the point of origin. This leaves us with the transverse oscillators as degrees of freedom. In the classical description the string is massive, except when all modes have zero amplitude which makes it massless (and boring). The Regge slope \( \alpha' \) is set equal to one.
         </p>
         <h3 class="numbered">Open String</h3>
-        <div class="latex">
+        <p>
+          \begin{equation}
+            X^+ = \tau
+          \end{equation}
           \begin{align}
-            X^i &amp;= i \sqrt{2\alpha'} \sum_{n\in\mathbb{Z}_{\ne 0}} \frac{1}{n} \alpha_n^i e^{-\pi inc\tau} \cos(\pi n\sigma) \\
-            &amp;= 2 \sqrt{2\alpha'} \sum_{n=1}^\infty \frac{1}{n} \left( a_n^i \sin(\pi nc\tau) - b_n^i \cos(\pi nc\tau) \right) \cos(\pi n\sigma)
+            X^i &amp;= i \sqrt{2\alpha'} \sum_{n\in\mathbb{Z}_{\ne 0}} \frac{1}{n} \alpha_n^i e^{-\pi inc\tau} \cos(\pi n\sigma) = \\
+            &amp;= 2 \sqrt{2\alpha'} \sum_{n\in\mathbb{N}^*} \frac{1}{n} \left( a_n^i \sin(\pi nc\tau) - b_n^i \cos(\pi nc\tau) \right) \cos(\pi n\sigma)
           \end{align}
-        </div>
-        <h3 class="numbered">Closed String</h3>
-        <div class="latex">
           \begin{align}
-            X^i &amp;= i \sqrt{\frac{\alpha'}{2}} \sum_{n\in\mathbb{Z}_{\ne 0}} \frac{1}{n} \left( \alpha_n^i e^{-2\pi in(c\tau+\sigma)} + \tilde\alpha_n^i e^{-2\pi in(c\tau-\sigma)} \right) \\
+            X^- &amp;= \tau
+                  - 2\pi c\alpha' \sum_{n\in\mathbb{N}^*} \sum_{m\in\mathbb{N}^*} \frac{1}{n+m} \left(
+                    (b_n^i a_m^i + a_n^i b_m^i) \cos(\pi (n+m)c\tau) +
+                    (b_n^i b_m^i - a_n^i a_m^i) \sin(\pi (n+m)c\tau)
+                  \right) \cos(\pi (n+m) \sigma) - \\
+                &amp;\quad {} - 2\pi c\alpha' \sum_{n\in\mathbb{N}^*} \sum_{m\in\mathbb{N}^*\backslash \{n\}} \frac{1}{n-m} \left(
+                    (b_n^i a_m^i - a_n^i b_m^i) \cos(\pi (n-m)c\tau) -
+                    (b_n^i b_m^i + a_n^i a_m^i) \sin(\pi (n-m)c\tau)
+                  \right) \cos(\pi (n-m) \sigma)
+          \end{align}
+        </p>
+        <!-- <h3 class="numbered">Closed String</h3>
+        <p>
+          \begin{align}
+            X^i &amp;= i \sqrt{\frac{\alpha'}{2}} \sum_{n\in\mathbb{Z}_{\ne 0}} \frac{1}{n} \left( \alpha_n^i e^{-2\pi in(c\tau+\sigma)} + \tilde\alpha_n^i e^{-2\pi in(c\tau-\sigma)} \right) = \\
             &amp;= \sqrt{2\alpha'} \sum_{n=1}^\infty \frac{1}{n} \left( a_n^i \sin(2\pi n(c\tau+\sigma)) - b_n^i \cos(2\pi n(c\tau+\sigma)) + \tilde{a}_n^i \sin(2\pi n(c\tau-\sigma)) - \tilde{b}_n^i \cos(2\pi n(c\tau-\sigma)) \right)
           \end{align}
-        </div>
+        </p> -->
         <h2>References</h2>
         <ol>
           <li>Polchinski, Joseph (1998). <i>String Theory</i>, Cambridge University Press</li>
