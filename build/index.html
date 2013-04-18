@@ -53,13 +53,38 @@
             \frac{1}{c^2} = 2 \alpha' \pi^2 \sum_{n\in\mathbb{N}^*} \left( a_n^i a_n^i + b_n^i b_n^i \right)
           \end{equation}
         </p>
-        <!-- <h3 class="numbered">Closed String</h3>
+        <h3 class="numbered">Closed String</h3>
         <p>
+          \begin{equation}
+            X^+ = \tau
+          \end{equation}
           \begin{align}
             X^i &amp;= i \sqrt{\frac{\alpha'}{2}} \sum_{n\in\mathbb{Z}_{\ne 0}} \frac{1}{n} \left( \alpha_n^i e^{-2\pi in(c\tau+\sigma)} + \tilde\alpha_n^i e^{-2\pi in(c\tau-\sigma)} \right) = \\
             &amp;= \sqrt{2\alpha'} \sum_{n=1}^\infty \frac{1}{n} \left( a_n^i \sin(2\pi n(c\tau+\sigma)) - b_n^i \cos(2\pi n(c\tau+\sigma)) + \tilde{a}_n^i \sin(2\pi n(c\tau-\sigma)) - \tilde{b}_n^i \cos(2\pi n(c\tau-\sigma)) \right)
           \end{align}
-        </p> -->
+          \begin{align}
+            X^- &amp;= \tau
+                  - 2\pi c\alpha' \sum_{n\in\mathbb{N}^*} \sum_{m\in\mathbb{N}^*} \frac{1}{n+m} \left(
+                    (b_n^i a_m^i + a_n^i b_m^i) \cos(2\pi (n+m)(c\tau+\sigma)) +
+                    (b_n^i b_m^i - a_n^i a_m^i) \sin(2\pi (n+m)(c\tau+\sigma))
+                  \right) - \\
+                &amp;\quad {} - 2\pi c\alpha' \sum_{n\in\mathbb{N}^*} \sum_{m\in\mathbb{N}^*\backslash \{n\}} \frac{1}{n-m} \left(
+                    (b_n^i a_m^i - a_n^i b_m^i) \cos(2\pi (n-m)(c\tau+\sigma)) -
+                    (b_n^i b_m^i + a_n^i a_m^i) \sin(2\pi (n-m)(c\tau+\sigma))
+                  \right) - \\
+                &amp;\quad {} - 2\pi c\alpha' \sum_{n\in\mathbb{N}^*} \sum_{m\in\mathbb{N}^*} \frac{1}{n+m} \left(
+                    (\tilde{b}_n^i \tilde{a}_m^i + \tilde{a}_n^i \tilde{b}_m^i) \cos(2\pi (n+m)(c\tau-\sigma)) +
+                    (\tilde{b}_n^i \tilde{b}_m^i - \tilde{a}_n^i \tilde{a}_m^i) \sin(2\pi (n+m)(c\tau-\sigma))
+                  \right) - \\
+                &amp;\quad {} - 2\pi c\alpha' \sum_{n\in\mathbb{N}^*} \sum_{m\in\mathbb{N}^*\backslash \{n\}} \frac{1}{n-m} \left(
+                    (\tilde{b}_n^i \tilde{a}_m^i - \tilde{a}_n^i \tilde{b}_m^i) \cos(2\pi (n-m)(c\tau-\sigma)) -
+                    (\tilde{b}_n^i \tilde{b}_m^i + \tilde{a}_n^i \tilde{a}_m^i) \sin(2\pi (n-m)(c\tau-\sigma))
+                  \right)
+          \end{align}
+          \begin{equation}
+            \frac{1}{c^2} = 8 \alpha' \pi^2 \sum_{n\in\mathbb{N}^*} \left( a_n^i a_n^i + b_n^i b_n^i \right) = 8 \alpha' \pi^2 \sum_{n\in\mathbb{N}^*} \left( \tilde{a}_n^i \tilde{a}_n^i + \tilde{b}_n^i \tilde{b}_n^i \right)
+          \end{equation}
+        </p>
         <h2>References</h2>
         <ol>
           <li>Polchinski, Joseph (1998). <i>String Theory</i>, Cambridge University Press</li>
