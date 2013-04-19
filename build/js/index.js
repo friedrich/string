@@ -246,16 +246,19 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
     };
 
     StringAnimation.prototype.update_string = function() {
-      var modes,
-        _this = this;
+      var i, mode, modes, modesi, n;
 
-      modes = this.indexed_modes.map(function(indexed_modesi) {
-        var mode, modesi, n;
-
+      modes = [];
+      for (i in this.indexed_modes) {
         modesi = [];
-        for (n in indexed_modesi) {
-          mode = indexed_modesi[n];
-          if (_this.string_open) {
+        for (n in this.indexed_modes[i]) {
+          if (n <= 0) {
+            continue;
+          }
+          mode = $.extend({
+            n: parseInt(n)
+          }, this.indexed_modes[i][n]);
+          if (this.string_open) {
             if (mode.a || mode.b) {
               modesi.push(mode);
             }
@@ -265,8 +268,8 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
             }
           }
         }
-        return modesi;
-      });
+        modes.push(modesi);
+      }
       return this.string = this.string_open ? new OpenString(modes) : new ClosedString(modes);
     };
 
@@ -277,18 +280,14 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
     };
 
     StringAnimation.prototype.get_mode = function(n, i) {
-      var modesi;
-
-      return modesi = (this.indexed_modes[i - 2] || {})[n];
+      return $.extend({}, (this.indexed_modes[i] || {})[n]);
     };
 
     StringAnimation.prototype.set_mode = function(n, i, settings) {
-      var mode, modesi, _base, _name;
+      var mode, modesi, _base;
 
-      modesi = (_base = this.indexed_modes)[_name = i - 2] || (_base[_name] = {});
-      mode = modesi[n] || (modesi[n] = {
-        n: n
-      });
+      modesi = (_base = this.indexed_modes)[i] || (_base[i] = {});
+      mode = modesi[n] || (modesi[n] = {});
       $.extend(mode, settings);
       mode.a || (mode.a = 0);
       mode.b || (mode.b = 0);
@@ -296,10 +295,12 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
       return mode.d || (mode.d = 0);
     };
 
+    StringAnimation.prototype.normalize_closed_modes = function(left, value) {};
+
     StringAnimation.prototype.load_settings = function() {
       var amplitude, config_string, i, kind, match, mode_search, n, settings;
 
-      this.indexed_modes = [];
+      this.indexed_modes = {};
       if (window.location.hash && window.location.hash.length > 1) {
         config_string = window.location.hash;
       } else if (window.location.search && window.location.search.length > 1) {
@@ -329,16 +330,15 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
     };
 
     StringAnimation.prototype.save_settings = function() {
-      var i, mode, modesi, n, settings, _i, _ref2;
+      var i, mode, modesi, n, settings;
 
       if (this.string_open) {
         settings = ["open"];
       } else {
         settings = ["closed"];
       }
-      for (i = _i = 0, _ref2 = this.indexed_modes.length - 1; 0 <= _ref2 ? _i <= _ref2 : _i >= _ref2; i = 0 <= _ref2 ? ++_i : --_i) {
+      for (i in this.indexed_modes) {
         modesi = this.indexed_modes[i];
-        i += 2;
         for (n in modesi) {
           mode = modesi[n];
           if (mode.a) {
@@ -366,73 +366,146 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
     };
 
     StringAnimation.prototype.init_controls = function() {
-      var controls_table, i, max_i, max_mode, n, table_cells, tr, type_control_button, _i, _j, _k, _len, _ref2, _results,
+      var build_table_cells, modes_control_container,
         _this = this;
 
-      controls_table = $(this.container).find("table[data-string-modes-table]")[0];
-      max_i = 3;
-      max_mode = 8;
-      table_cells = (function() {
-        _results = [];
-        for (var _i = 1; 1 <= max_i ? _i <= max_i : _i >= max_i; 1 <= max_i ? _i++ : _i--){ _results.push(_i); }
-        return _results;
-      }).apply(this).map(function(i) {
-        var _i, _results;
+      modes_control_container = $(this.container).find("[data-string-modes]");
+      build_table_cells = function(open, max_mode) {
+        var add_coordinate_header, max_i, table, tr, _i, _results;
 
-        return (function() {
+        table = $("<table/>");
+        max_i = 3;
+        if (!open) {
+          table.append($('<tr><th colspan=2>left</th><th></th><th colspan=2>right</th></tr>'));
+        }
+        tr = $("<tr/>");
+        table.append(tr);
+        add_coordinate_header = function(i) {
+          return tr.append($('<th class="string-mode-coordinate-cell-' + i + '">i = <span class="string-mode-coordinate">' + i + '</span></th>'));
+        };
+        if (open) {
+          add_coordinate_header(2);
+          tr.append($("<th/>"));
+          add_coordinate_header(3);
+        } else {
+          add_coordinate_header(2);
+          add_coordinate_header(3);
+          tr.append($("<th/>"));
+          add_coordinate_header(2);
+          add_coordinate_header(3);
+        }
+        (function() {
           _results = [];
-          for (var _i = 0; 0 <= max_mode ? _i <= max_mode : _i >= max_mode; 0 <= max_mode ? _i++ : _i--){ _results.push(_i); }
+          for (var _i = 1; 1 <= max_mode ? _i <= max_mode : _i >= max_mode; 1 <= max_mode ? _i++ : _i--){ _results.push(_i); }
           return _results;
         }).apply(this).map(function(n) {
-          var cell, control, mode;
+          var add_control;
 
-          cell = document.createElement(i === 1 || n === 0 ? "th" : "td");
-          if (i === 1 && n === 0) {
+          tr = $("<tr/>");
+          table.append(tr);
+          add_control = function(i, secondary) {
+            var cell, control, mode;
 
-          } else if (i === 1) {
-            cell.innerHTML = n;
-          } else if (n === 0) {
-            cell.className = "string-mode-coordinate-cell-" + i;
-            cell.innerHTML = 'i = <span class="string-mode-coordinate">' + i + "</span>";
-          } else {
-            mode = _this.get_mode(n, i) || {};
+            cell = $("<td/>");
+            tr.append(cell);
+            mode = _this.get_mode(n, i);
             control = new AmplitudeControl({
               max: 0.5,
               size: 40,
-              x: mode.a,
-              y: mode.b,
+              x: secondary ? mode.c : mode.a,
+              y: secondary ? mode.d : mode.b,
               changed: function(control) {
-                _this.set_mode(n, i, {
-                  a: control.x,
-                  b: control.y
-                });
+                mode = _this.get_mode(n, i);
+                if (secondary) {
+                  mode.c = control.x;
+                  mode.d = control.y;
+                } else {
+                  mode.a = control.x;
+                  mode.b = control.y;
+                }
+                _this.set_mode(n, i, mode);
+                if (!open) {
+                  _this.normalize_closed_modes(secondary, i);
+                  _this.update_controls();
+                }
                 _this.update_string();
                 return _this.save_settings();
               }
             });
-            cell.appendChild(control.element);
+            cell.append(control.element);
+            if (open) {
+              return _this.set_mode(n, i, {
+                open_control: control
+              });
+            } else {
+              if (secondary) {
+                return _this.set_mode(n, i, {
+                  right_control: control
+                });
+              } else {
+                return _this.set_mode(n, i, {
+                  left_control: control
+                });
+              }
+            }
+          };
+          if (open) {
+            add_control(2, false);
+            tr.append($("<th>" + n + "</th>"));
+            return add_control(3, false);
+          } else {
+            add_control(2, false);
+            add_control(3, false);
+            tr.append($("<th>" + n + "</th>"));
+            add_control(2, true);
+            return add_control(3, true);
           }
-          return cell;
         });
+        return table;
+      };
+      this.open_modes_table = build_table_cells(true, 8);
+      this.closed_modes_table = build_table_cells(false, 8);
+      modes_control_container.append(this.open_modes_table);
+      modes_control_container.append(this.closed_modes_table);
+      $(this.container).find("button[data-string-type]").on("click", function() {
+        _this.string_open = !_this.string_open;
+        _this.update_controls();
+        _this.update_string();
+        return _this.save_settings();
       });
-      for (n = _j = 0; 0 <= max_mode ? _j <= max_mode : _j >= max_mode; n = 0 <= max_mode ? ++_j : --_j) {
-        tr = document.createElement("tr");
-        controls_table.appendChild(tr);
-        _ref2 = [2, 1, 3];
-        for (_k = 0, _len = _ref2.length; _k < _len; _k++) {
-          i = _ref2[_k];
-          tr.appendChild(table_cells[i - 1][n]);
-        }
-      }
-      type_control_button = $(this.container).find("button[data-string-type]")[0];
-      if (type_control_button) {
-        $(type_control_button).on("click", function() {
-          _this.string_open = !_this.string_open;
-          _this.update_string();
-          return _this.save_settings();
-        });
-      }
+      this.update_controls();
       return this.update_string();
+    };
+
+    StringAnimation.prototype.update_controls = function() {
+      var i, mode, n, _results;
+
+      if (this.string_open) {
+        $(this.open_modes_table).show();
+        $(this.closed_modes_table).hide();
+      } else {
+        $(this.open_modes_table).hide();
+        $(this.closed_modes_table).show();
+      }
+      _results = [];
+      for (i in this.indexed_modes) {
+        _results.push((function() {
+          var _results1;
+
+          _results1 = [];
+          for (n in this.indexed_modes[i]) {
+            mode = this.indexed_modes[i][n];
+            if (this.string_open) {
+              _results1.push(mode.open_control.update(mode.a, mode.b));
+            } else {
+              mode.left_control.update(mode.a, mode.b);
+              _results1.push(mode.right_control.update(mode.c, mode.d));
+            }
+          }
+          return _results1;
+        }).call(this));
+      }
+      return _results;
     };
 
     StringAnimation.prototype.show_not_supported = function() {
@@ -600,7 +673,7 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
       $(document).on("mouseup", mouse_up_handler);
       offset = $(element).offset();
       if (window.getComputedStyle) {
-        desired_cursor = window.getComputedStyle(element, null).cursor;
+        desired_cursor = $(element).css("cursor");
         if (!desired_cursor || desired_cursor === "auto") {
           desired_cursor = "default";
         }

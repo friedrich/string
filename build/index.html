@@ -81,9 +81,16 @@
                     (\tilde{b}_n^i \tilde{b}_m^i + \tilde{a}_n^i \tilde{a}_m^i) \sin(2\pi (n-m)(c\tau-\sigma))
                   \right)
           \end{align}
-          \begin{equation}
+          <!-- \begin{equation}
             \frac{1}{c^2} = 8 \alpha' \pi^2 \sum_{n\in\mathbb{N}^*} \left( a_n^i a_n^i + b_n^i b_n^i \right) = 8 \alpha' \pi^2 \sum_{n\in\mathbb{N}^*} \left( \tilde{a}_n^i \tilde{a}_n^i + \tilde{b}_n^i \tilde{b}_n^i \right)
+          \end{equation} -->
+          \begin{equation}
+            \frac{1}{c^2} = 4 \alpha' \pi^2 \sum_{n\in\mathbb{N}^*} \left( a_n^i a_n^i + b_n^i b_n^i + \tilde{a}_n^i \tilde{a}_n^i + \tilde{b}_n^i \tilde{b}_n^i \right)
           \end{equation}
+          \begin{equation}
+            \sum_{n\in\mathbb{N}^*} \left( a_n^i a_n^i + b_n^i b_n^i \right) = \sum_{n\in\mathbb{N}^*} \left( \tilde{a}_n^i \tilde{a}_n^i + \tilde{b}_n^i \tilde{b}_n^i \right)
+          \end{equation}
+          Level matching constraints are not enforced on the input data.
         </p>
         <h2>References</h2>
         <ol>

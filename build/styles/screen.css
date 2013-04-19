@@ -95,7 +95,7 @@
   color: white;
   text-shadow: #636363 0 -1px 0;
   display: block;
-  margin: 1.5em auto 0;
+  margin: 2.5em auto 0;
 }
 .string .controls button.string-type:hover {
   text-decoration: none;
@@ -126,7 +126,7 @@
   margin: -1px !important;
 }
 .string .controls .modes-control table {
-  margin: 0.5em auto 0;
+  margin: 1.5em auto 0;
 }
 .string .controls .string-mode-coordinate-cell-2 .string-mode-coordinate {
   color: red;

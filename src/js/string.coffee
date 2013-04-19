@@ -195,16 +195,17 @@ class StringAnimation
 		@animation_time = 0
 
 	update_string: ->
-		modes = @indexed_modes.map (indexed_modesi) =>
+		modes = []
+		for i of @indexed_modes
 			modesi = []
-			for n of indexed_modesi
+			for n of @indexed_modes[i]
 				continue if n <= 0
-				mode = indexed_modesi[n]
+				mode = $.extend({ n: parseInt(n) }, @indexed_modes[i][n])
 				if @string_open
 					modesi.push(mode) if mode.a || mode.b
 				else
 					modesi.push(mode) if mode.a || mode.b || mode.c || mode.d
-			modesi
+			modes.push(modesi)
 
 		@string =
 			if @string_open
@@ -217,19 +218,32 @@ class StringAnimation
 			history.replaceState(null, "", "#" + encodeURIComponent(@mode_control_textarea.value))
 
 	get_mode: (n, i) ->
-		modesi = (@indexed_modes[i-2] || {})[n]
+		return $.extend({}, (@indexed_modes[i] || {})[n])
 
 	set_mode: (n, i, settings) ->
-		modesi = @indexed_modes[i-2] ||= {}
-		mode = modesi[n] ||= { n }
+		modesi = @indexed_modes[i] ||= {}
+		mode = modesi[n] ||= {}
 		$.extend(mode, settings)
 		mode.a ||= 0
 		mode.b ||= 0
 		mode.c ||= 0
 		mode.d ||= 0
 
+	normalize_closed_modes: (left, value) ->
+		# left_sum = 0
+		# right_sum = 0
+
+		# for modesi in @indexed_modes
+		# 	for n of modesi
+		# 		continue if n <= 0
+		# 		mode = modesi[n]
+		# 		left_sum += mode.a * mode.a + mode.b * mode.b
+		# 		right_sum += mode.c * mode.c + mode.d * mode.d
+
+		# console.log left_sum, right_sum
+
 	load_settings: ->
-		@indexed_modes = []
+		@indexed_modes = {}
 
 		if window.location.hash && window.location.hash.length > 1
 			config_string = window.location.hash
@@ -260,9 +274,8 @@ class StringAnimation
 		else
 			settings = ["closed"]
 
-		for i in [0..@indexed_modes.length-1]
+		for i of @indexed_modes
 			modesi = @indexed_modes[i]
-			i += 2
 			for n of modesi
 				mode = modesi[n]
 				settings.push("a" + n + "_" + i + "=" + mode.a.toFixed(2)) if mode.a
@@ -279,54 +292,115 @@ class StringAnimation
 			window.location.hash = settings
 
 	init_controls: () ->
-		modes_control_container = $(@container).find("[data-string-modes]")[0]
+		modes_control_container = $(@container).find("[data-string-modes]")
 
-		@open_modes_table = document.createElement("table")
-		@closed_modes_table = document.createElement("table")
-		modes_control_container.appendChild(@open_modes_table)
-		modes_control_container.appendChild(@closed_modes_table)
+		build_table_cells = (open, max_mode) =>
+			table = $("<table/>")
 
-		max_i = 3
-		max_mode = 8
+			max_i = 3
 
-		table_cells = [1..max_i].map (i) =>
-			[0..max_mode].map (n) =>
-				cell = document.createElement(if i == 1 || n == 0 then "th" else "td")
-				if i == 1 && n == 0
-					;
-				else if i == 1
-					cell.innerHTML = n
-				else if n == 0
-					cell.className = "string-mode-coordinate-cell-" + i
-					cell.innerHTML = 'i = <span class="string-mode-coordinate">' + i + "</span>"
-				else
-					mode = @get_mode(n, i) || {}
+			unless open
+				table.append($('<tr><th colspan=2>left</th><th></th><th colspan=2>right</th></tr>'))
+
+			tr = $("<tr/>")
+			table.append(tr)
+
+			add_coordinate_header = (i) ->
+				tr.append($('<th class="string-mode-coordinate-cell-' + i +
+							'">i = <span class="string-mode-coordinate">' + i + '</span></th>'))
+
+			if open
+				add_coordinate_header(2)
+				tr.append($("<th/>"))
+				add_coordinate_header(3)
+			else
+				add_coordinate_header(2)
+				add_coordinate_header(3)
+				tr.append($("<th/>"))
+				add_coordinate_header(2)
+				add_coordinate_header(3)
+
+			[1..max_mode].map (n) =>
+				tr = $("<tr/>")
+				table.append(tr)
+
+				add_control = (i, secondary) =>
+					cell = $("<td/>")
+					tr.append(cell)
+
+					mode = @get_mode(n, i)
 					control = new AmplitudeControl
 						max: 0.5
 						size: 40
-						x: mode.a
-						y: mode.b
+						x: if secondary then mode.c else mode.a
+						y: if secondary then mode.d else mode.b
 						changed: (control) =>
-							@set_mode(n, i, { a: control.x, b: control.y })
+							mode = @get_mode(n, i)
+							if secondary
+								mode.c = control.x
+								mode.d = control.y
+							else
+								mode.a = control.x
+								mode.b = control.y
+							@set_mode(n, i, mode)
+							unless open
+								@normalize_closed_modes(secondary, i)
+								@update_controls()
 							@update_string()
 							@save_settings()
-					cell.appendChild(control.element)
-				cell
+					cell.append(control.element)
 
-		for n in [0..max_mode]
-			tr = document.createElement("tr")
-			@open_modes_table.appendChild(tr)
-			for i in [2, 1, 3]
-				tr.appendChild(table_cells[i-1][n])
+					if open
+						@set_mode(n, i, { open_control: control })
+					else
+						if secondary
+							@set_mode(n, i, { right_control: control })
+						else
+							@set_mode(n, i, { left_control: control })
 
-		type_control_button = $(@container).find("button[data-string-type]")[0]
-		if type_control_button
-			$(type_control_button).on "click", =>
-				@string_open = !@string_open
-				@update_string()
-				@save_settings()
+				if open
+					add_control(2, false)
+					tr.append($("<th>" + n + "</th>"))
+					add_control(3, false)
+				else
+					add_control(2, false)
+					add_control(3, false)
+					tr.append($("<th>" + n + "</th>"))
+					add_control(2, true)
+					add_control(3, true)
 
+			return table
+
+		@open_modes_table = build_table_cells(true, 8)
+		@closed_modes_table = build_table_cells(false, 8)
+		modes_control_container.append(@open_modes_table)
+		modes_control_container.append(@closed_modes_table)
+
+		$(@container).find("button[data-string-type]").on "click", =>
+			@string_open = !@string_open
+			@update_controls()
+			@update_string()
+			@save_settings()
+
+		@update_controls()
 		@update_string()
+
+	update_controls: ->
+		if @string_open
+			$(@open_modes_table).show()
+			$(@closed_modes_table).hide()
+		else
+			$(@open_modes_table).hide()
+			$(@closed_modes_table).show()
+
+		for i of @indexed_modes
+			for n of @indexed_modes[i]
+				mode = @indexed_modes[i][n]
+				if @string_open
+					mode.open_control.update(mode.a, mode.b)
+				else
+					mode.left_control.update(mode.a, mode.b)
+					mode.right_control.update(mode.c, mode.d)
 
 	show_not_supported: ->
 		@display_container.innerHTML = "<p>Not possible with your browser :-(</p>"
