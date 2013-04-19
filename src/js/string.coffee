@@ -236,7 +236,7 @@ class StringAnimation
 			config_string = window.location.search
 
 		if config_string
-			mode_search = /([ab])(\d+)_(\d+)=([-+]?\d*\.?\d+)/g
+			mode_search = /([ab])_?(\d+)_(\d+)=([-+]?\d*\.?\d+)/g
 			while (match = mode_search.exec(config_string))
 				kind = match[1]
 				n = parseInt(match[2])
