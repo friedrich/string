@@ -1,4 +1,5 @@
 @import susy
+@import sassy-buttons
 @import megrim_font
 @import marcellus_font
 
@@ -26,7 +27,7 @@ $grid-padding: $gutter-width
   margin-bottom: 2em
 
   .display
-    +span-columns(10, 12)
+    +span-columns(9, 12)
     height: 100%
     +framed
     cursor: move
@@ -36,19 +37,22 @@ $grid-padding: $gutter-width
       margin: 2em
 
   .controls
-    +span-columns(2 omega, 12)
+    +span-columns(3 omega, 12)
     height: 100%
     +framed
 
-    .controls-table
-      margin: 3em auto
+    button.string-type
+      +sassy-button("matte", 0.5em, 0.8em, gray)
+      display: block
+      margin: 1.5em auto 0
 
-    .string-mode-coordinate-cell-2
-      .string-mode-coordinate
-        color: red
-    .string-mode-coordinate-cell-3
-      .string-mode-coordinate
-        color: green
+    .modes-control table
+      margin: 0.5em auto 0
+
+    .string-mode-coordinate-cell-2 .string-mode-coordinate
+      color: red
+    .string-mode-coordinate-cell-3 .string-mode-coordinate
+      color: green
 
     canvas
       cursor: crosshair

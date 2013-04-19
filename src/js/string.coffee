@@ -278,7 +278,12 @@ class StringAnimation
 			window.location.hash = settings
 
 	init_controls: () ->
-		controls_table = $(@container).find("table[data-string-modes-table]")[0]
+		modes_control_container = $(@container).find("[data-string-modes]")[0]
+
+		@open_modes_table = document.createElement("table")
+		@closed_modes_table = document.createElement("table")
+		modes_control_container.appendChild(@open_modes_table)
+		modes_control_container.appendChild(@closed_modes_table)
 
 		max_i = 3
 		max_mode = 8
@@ -309,7 +314,7 @@ class StringAnimation
 
 		for n in [0..max_mode]
 			tr = document.createElement("tr")
-			controls_table.appendChild(tr)
+			@open_modes_table.appendChild(tr)
 			for i in [2, 1, 3]
 				tr.appendChild(table_cells[i-1][n])
 
@@ -465,7 +470,7 @@ add_click_and_drag_listener = (element, callback) ->
 
 		offset = $(element).offset()
 		if window.getComputedStyle
-			desired_cursor = window.getComputedStyle(element, null).cursor
+			desired_cursor = $(element).css("cursor")
 			desired_cursor = "default" if !desired_cursor || desired_cursor == "auto"
 			style = $('<style type="text/css">* { cursor: ' + desired_cursor + ' !important; }</style>')
 		$("head").append(style) if style
