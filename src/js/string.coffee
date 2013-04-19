@@ -198,6 +198,7 @@ class StringAnimation
 		modes = @indexed_modes.map (indexed_modesi) =>
 			modesi = []
 			for n of indexed_modesi
+				continue if n <= 0
 				mode = indexed_modesi[n]
 				if @string_open
 					modesi.push(mode) if mode.a || mode.b
