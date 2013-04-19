@@ -228,7 +228,7 @@
       if (!this.init_display()) {
         return;
       }
-      this.load_settings();
+      this.load_settings() && this.save_settings();
       this.init_controls();
       this.setup_rotation_control();
       this.init_animation();
@@ -250,19 +250,19 @@
         modesi = [];
         for (n in indexed_modesi) {
           mode = indexed_modesi[n];
-          if (_this.string_type === "closed") {
-            if (mode.a || mode.b || mode.c || mode.d) {
+          if (_this.string_open) {
+            if (mode.a || mode.b) {
               modesi.push(mode);
             }
           } else {
-            if (mode.a || mode.b) {
+            if (mode.a || mode.b || mode.c || mode.d) {
               modesi.push(mode);
             }
           }
         }
         return modesi;
       });
-      return this.string = this.string_type === "closed" ? new ClosedString(modes) : new OpenString(modes);
+      return this.string = this.string_open ? new OpenString(modes) : new ClosedString(modes);
     };
 
     StringAnimation.prototype.update_site_uri = function() {
@@ -294,55 +294,72 @@
     StringAnimation.prototype.load_settings = function() {
       var amplitude, config_string, i, kind, match, mode_search, n, settings;
 
-      this.string_type = "open";
       this.indexed_modes = [];
-      config_string = (window.location.search || "") + (window.location.hash || "");
-      mode_search = /([ab])_(\d+)_(\d+)=([-+]?\d*\.?\d+)/g;
-      while ((match = mode_search.exec(config_string))) {
-        kind = match[1];
-        n = parseInt(match[2]);
-        i = parseInt(match[3]);
-        amplitude = parseFloat(match[4]);
-        settings = {};
-        settings[kind] = amplitude;
-        this.set_mode(n, i, settings);
+      if (window.location.hash && window.location.hash.length > 1) {
+        config_string = window.location.hash;
+      } else if (window.location.search && window.location.search.length > 1) {
+        config_string = window.location.search;
       }
-      if (this.indexed_modes.length === 0) {
+      if (config_string) {
+        mode_search = /([ab])(\d+)_(\d+)=([-+]?\d*\.?\d+)/g;
+        while ((match = mode_search.exec(config_string))) {
+          kind = match[1];
+          n = parseInt(match[2]);
+          i = parseInt(match[3]);
+          amplitude = parseFloat(match[4]);
+          settings = {};
+          settings[kind] = amplitude;
+          this.set_mode(n, i, settings);
+        }
+        this.string_open = !/closed/.test(config_string);
+        return true;
+      } else {
+        this.string_open = true;
         this.set_mode(1, 2, {
           a: 0.5
         });
-        return this.set_mode(2, 2, {
+        this.set_mode(2, 2, {
           a: 0.5
         });
+        return false;
       }
     };
 
     StringAnimation.prototype.save_settings = function() {
       var i, mode, modesi, n, settings, _i, _ref2;
 
-      settings = "";
+      if (this.string_open) {
+        settings = ["open"];
+      } else {
+        settings = ["closed"];
+      }
       for (i = _i = 0, _ref2 = this.indexed_modes.length - 1; 0 <= _ref2 ? _i <= _ref2 : _i >= _ref2; i = 0 <= _ref2 ? ++_i : --_i) {
         modesi = this.indexed_modes[i];
         i += 2;
         for (n in modesi) {
           mode = modesi[n];
           if (mode.a) {
-            settings += "a_" + n + "_" + i + "=" + mode.a.toFixed(3);
+            settings.push("a" + n + "_" + i + "=" + mode.a.toFixed(2));
           }
           if (mode.b) {
-            settings += "b_" + n + "_" + i + "=" + mode.b.toFixed(3);
+            settings.push("b" + n + "_" + i + "=" + mode.b.toFixed(2));
           }
-          if (this.string_type === "closed") {
+          if (!this.string_open) {
             if (mode.a) {
-              settings += "c_" + n + "_" + i + "=" + mode.c.toFixed(3);
+              settings.push("c" + n + "_" + i + "=" + mode.c.toFixed(2));
             }
             if (mode.b) {
-              settings += "d_" + n + "_" + i + "=" + mode.d.toFixed(3);
+              settings.push("d" + n + "_" + i + "=" + mode.d.toFixed(2));
             }
           }
         }
       }
-      return window.location.hash = settings;
+      settings = settings.join("&");
+      if (window.history && history.replaceState) {
+        return history.replaceState({}, "", "?" + settings);
+      } else {
+        return window.location.hash = settings;
+      }
     };
 
     StringAnimation.prototype.init_controls = function() {
