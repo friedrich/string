@@ -387,9 +387,10 @@
           if (i === 1 && n === 0) {
 
           } else if (i === 1) {
-            cell.textContent = n;
+            cell.innerHTML = n;
           } else if (n === 0) {
-            cell.textContent = "i = " + i;
+            cell.className = "string-mode-coordinate-cell-" + i;
+            cell.innerHTML = 'i = <span class="string-mode-coordinate">' + i + "</span>";
           } else {
             mode = _this.get_mode(n, i) || {};
             control = new AmplitudeControl({
