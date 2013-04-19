@@ -313,11 +313,12 @@ class StringAnimation
 			for i in [2, 1, 3]
 				tr.appendChild(table_cells[i-1][n])
 
-		# @type_control_button = $(@container).find("button[data-string-type]")[0]
-		# if @type_control_button
-		# 	$(@type_control_button).on "click", =>
-		# 		@open_string = !@open_string
-		# 		@update_string()
+		type_control_button = $(@container).find("button[data-string-type]")[0]
+		if type_control_button
+			$(type_control_button).on "click", =>
+				@string_open = !@string_open
+				@update_string()
+				@save_settings()
 
 		@update_string()
 

@@ -366,7 +366,7 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
     };
 
     StringAnimation.prototype.init_controls = function() {
-      var controls_table, i, max_i, max_mode, n, table_cells, tr, _i, _j, _k, _len, _ref2, _results,
+      var controls_table, i, max_i, max_mode, n, table_cells, tr, type_control_button, _i, _j, _k, _len, _ref2, _results,
         _this = this;
 
       controls_table = $(this.container).find("table[data-string-modes-table]")[0];
@@ -423,6 +423,14 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
           i = _ref2[_k];
           tr.appendChild(table_cells[i - 1][n]);
         }
+      }
+      type_control_button = $(this.container).find("button[data-string-type]")[0];
+      if (type_control_button) {
+        $(type_control_button).on("click", function() {
+          _this.string_open = !_this.string_open;
+          _this.update_string();
+          return _this.save_settings();
+        });
       }
       return this.update_string();
     };
