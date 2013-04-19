@@ -199,17 +199,17 @@ class StringAnimation
 			modesi = []
 			for n of indexed_modesi
 				mode = indexed_modesi[n]
-				if @string_type == "closed"
-					modesi.push(mode) if mode.a || mode.b || mode.c || mode.d
-				else
+				if @string_open
 					modesi.push(mode) if mode.a || mode.b
+				else
+					modesi.push(mode) if mode.a || mode.b || mode.c || mode.d
 			modesi
 
 		@string =
-			if @string_type == "closed"
-				new ClosedString(modes)
-			else
+			if @string_open
 				new OpenString(modes)
+			else
+				new ClosedString(modes)
 
 	update_site_uri: ->
 		if window.history && history.replaceState
@@ -228,39 +228,54 @@ class StringAnimation
 		mode.d ||= 0
 
 	load_settings: ->
-		@string_type = "open"
 		@indexed_modes = []
 
-		config_string = (window.location.search || "") + (window.location.hash || "")
+		if window.location.hash && window.location.hash.length > 1
+			config_string = window.location.hash
+		else if window.location.search && window.location.search.length > 1
+			config_string = window.location.search
 
-		mode_search = /([ab])_(\d+)_(\d+)=([-+]?\d*\.?\d+)/g
-		while (match = mode_search.exec(config_string))
-			kind = match[1]
-			n = parseInt(match[2])
-			i = parseInt(match[3])
-			amplitude = parseFloat(match[4])
+		if config_string
+			mode_search = /([ab])_?(\d+)_(\d+)=([-+]?\d*\.?\d+)/g
+			while (match = mode_search.exec(config_string))
+				kind = match[1]
+				n = parseInt(match[2])
+				i = parseInt(match[3])
+				amplitude = parseFloat(match[4])
 
-			settings = {}
-			settings[kind] = amplitude
-			@set_mode(n, i, settings)
+				settings = {}
+				settings[kind] = amplitude
+				@set_mode(n, i, settings)
 
-		if @indexed_modes.length == 0
+			@string_open = not /closed/.test(config_string)
+		else
+			@string_open = true
 			@set_mode(1, 2, { a: 0.5 })
 			@set_mode(2, 2, { a: 0.5 })
 
 	save_settings: ->
-		settings = ""
+		if @string_open
+			settings = ["open"]
+		else
+			settings = ["closed"]
+
 		for i in [0..@indexed_modes.length-1]
 			modesi = @indexed_modes[i]
 			i += 2
 			for n of modesi
 				mode = modesi[n]
-				settings += "a_" + n + "_" + i + "=" + mode.a.toFixed(3) if mode.a
-				settings += "b_" + n + "_" + i + "=" + mode.b.toFixed(3) if mode.b
-				if @string_type == "closed"
-					settings += "c_" + n + "_" + i + "=" + mode.c.toFixed(3) if mode.a
-					settings += "d_" + n + "_" + i + "=" + mode.d.toFixed(3) if mode.b
-		window.location.hash = settings
+				settings.push("a" + n + "_" + i + "=" + mode.a.toFixed(2)) if mode.a
+				settings.push("b" + n + "_" + i + "=" + mode.b.toFixed(2)) if mode.b
+				unless @string_open
+					settings.push("c" + n + "_" + i + "=" + mode.c.toFixed(2)) if mode.a
+					settings.push("d" + n + "_" + i + "=" + mode.d.toFixed(2)) if mode.b
+
+		settings = settings.join("&")
+
+		if window.history && history.replaceState
+			history.replaceState({}, "", "?" + settings)
+		else
+			window.location.hash = settings
 
 	init_controls: () ->
 		controls_table = $(@container).find("table[data-string-modes-table]")[0]
@@ -274,9 +289,10 @@ class StringAnimation
 				if i == 1 && n == 0
 					;
 				else if i == 1
-					cell.textContent = n
+					cell.innerHTML = n
 				else if n == 0
-					cell.textContent = "i = " + i
+					cell.className = "string-mode-coordinate-cell-" + i
+					cell.innerHTML = 'i = <span class="string-mode-coordinate">' + i + "</span>"
 				else
 					mode = @get_mode(n, i) || {}
 					control = new AmplitudeControl

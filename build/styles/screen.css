@@ -74,6 +74,12 @@
 .string .controls .controls-table {
   margin: 3em auto;
 }
+.string .controls .string-mode-coordinate-cell-2 .string-mode-coordinate {
+  color: red;
+}
+.string .controls .string-mode-coordinate-cell-3 .string-mode-coordinate {
+  color: green;
+}
 .string .controls canvas {
   cursor: crosshair;
 }
