@@ -343,10 +343,10 @@
             settings.push("b" + n + "_" + i + "=" + mode.b.toFixed(2));
           }
           if (!this.string_open) {
-            if (mode.a) {
+            if (mode.c) {
               settings.push("c" + n + "_" + i + "=" + mode.c.toFixed(2));
             }
-            if (mode.b) {
+            if (mode.d) {
               settings.push("d" + n + "_" + i + "=" + mode.d.toFixed(2));
             }
           }

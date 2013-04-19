@@ -267,8 +267,8 @@ class StringAnimation
 				settings.push("a" + n + "_" + i + "=" + mode.a.toFixed(2)) if mode.a
 				settings.push("b" + n + "_" + i + "=" + mode.b.toFixed(2)) if mode.b
 				unless @string_open
-					settings.push("c" + n + "_" + i + "=" + mode.c.toFixed(2)) if mode.a
-					settings.push("d" + n + "_" + i + "=" + mode.d.toFixed(2)) if mode.b
+					settings.push("c" + n + "_" + i + "=" + mode.c.toFixed(2)) if mode.c
+					settings.push("d" + n + "_" + i + "=" + mode.d.toFixed(2)) if mode.d
 
 		settings = settings.join("&")
 
