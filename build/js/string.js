@@ -228,7 +228,7 @@
       if (!this.init_display()) {
         return;
       }
-      this.load_settings() && this.save_settings();
+      this.load_settings();
       this.init_controls();
       this.setup_rotation_control();
       this.init_animation();
@@ -311,17 +311,15 @@
           settings[kind] = amplitude;
           this.set_mode(n, i, settings);
         }
-        this.string_open = !/closed/.test(config_string);
-        return true;
+        return this.string_open = !/closed/.test(config_string);
       } else {
         this.string_open = true;
         this.set_mode(1, 2, {
           a: 0.5
         });
-        this.set_mode(2, 2, {
+        return this.set_mode(2, 2, {
           a: 0.5
         });
-        return false;
       }
     };
 

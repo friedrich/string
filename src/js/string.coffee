@@ -184,7 +184,7 @@ class StringAnimation
 
 	constructor: (@container) ->
 		return unless @init_display()
-		@load_settings() and @save_settings()
+		@load_settings()
 		@init_controls()
 		@setup_rotation_control()
 		@init_animation()
@@ -248,12 +248,10 @@ class StringAnimation
 				@set_mode(n, i, settings)
 
 			@string_open = not /closed/.test(config_string)
-			return true
 		else
 			@string_open = true
 			@set_mode(1, 2, { a: 0.5 })
 			@set_mode(2, 2, { a: 0.5 })
-			return false
 
 	save_settings: ->
 		if @string_open
