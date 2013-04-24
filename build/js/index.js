@@ -375,8 +375,10 @@ return(!i||i!==r&&!b.contains(r,i))&&(e.type=o.origType,n=o.handler.apply(this,a
 
         table = $("<table/>");
         max_i = 3;
-        if (!open) {
-          table.append($('<tr><th colspan=2>left</th><th></th><th colspan=2>right</th></tr>'));
+        if (open) {
+          table.append($('<tr><th colspan=3>α</th></tr>'));
+        } else {
+          table.append($('<tr><th colspan=2>α</th><th></th><th colspan=2>α&#x303;</th></tr>'));
         }
         tr = $("<tr/>");
         table.append(tr);
