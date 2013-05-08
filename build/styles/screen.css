@@ -178,3 +178,13 @@ h2 {
   font-weight: normal;
   font-size: 1.5em;
 }
+
+#contact {
+  position: relative;
+}
+#contact a {
+  color: black;
+  bottom: 0;
+  right: 0;
+  position: absolute;
+}
